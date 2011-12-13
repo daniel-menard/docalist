@@ -8,7 +8,7 @@
  * @package     Fooltext
  * @subpackage  Indexing
  * @author      Daniel Ménard <Daniel.Menard@laposte.net>
- * @version     SVN: $Id
+ * @version     SVN: $Id$
  */
 namespace Fooltext\Indexing;
 
