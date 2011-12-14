@@ -13,9 +13,9 @@
 namespace Fooltext\Indexing;
 
 /**
- * Remplace les entités html/xml (&acirc; &quot; &#039; ...) par le caractère correspondant
+ * Remplace les entités html/xml (&amp;acirc; &amp;quot; &amp;#039; ...) par le caractère correspondant
  * Supprime tous les tags html/xml.
- * Supprime les commentaires (<!-- -->) et les directives (<?xxx >).
+ * Supprime les commentaires (&lt;!-- --&gt;) et les directives (&lt;?xxx &gt;).
  * Applique {@link \Fooltext\Indexing\Lowercase} pour convertir le texte en minuscules non accentuées.
  */
 class StripTags extends Lowercase
