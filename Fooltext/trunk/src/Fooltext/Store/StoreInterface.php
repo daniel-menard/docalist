@@ -1,9 +1,23 @@
 <?php
+/**
+ * This file is part of the Fooltext package.
+ *
+ * For copyright and license information, please view the
+ * LICENSE.txt file that was distributed with this source code.
+ *
+ * @package     Fooltext
+ * @subpackage  Store
+ * @author      Daniel Ménard <Daniel.Menard@laposte.net>
+ * @version     SVN: $Id$
+ */
 namespace Fooltext\Store;
 
 use Fooltext\Schema\Schema;
-use Fooltext\Document\Document;
 
+/**
+ * Interface des bases de données.
+ *
+ */
 interface StoreInterface
 {
     /**
@@ -11,18 +25,12 @@ interface StoreInterface
      *
      * Les options disponibles dépendent du backend utilisé.
      * Elles déterminent s'il faut créer une base de données
-     * ou ouvrir une base existantes, si la base doit être
+     * ou ouvrir une base existante, si la base doit être
      * ouverte en lecture seule ou en lecture/écriture, etc.
      *
      * @param array $options
      */
     public function __construct(array $options = array());
-
-    // Fonctions CRUD :
-    // - Create   -> put()
-    // - Retrieve -> find()
-    // - Update   -> put()
-    // - Delete   -> delete()
 
     /**
      * Retourne un document unique identifié par son ID.
@@ -105,7 +113,7 @@ interface StoreInterface
     // Manipulation du schéma de la base
 
     /**
-     * Retourne le schéma de la base
+     * Retourne le schéma de la base.
      *
      * @return \Fooltext\Schema\Schema
      */
