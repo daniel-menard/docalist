@@ -19,6 +19,11 @@ use Fooltext\Indexing\AnalyzerInterface;
  */
 class Lowercase implements AnalyzerInterface
 {
+    /**
+     * Table de conversion des caractères.
+     *
+     * @var array
+     */
     public static $map = array
     (
         // U0000 - Latin de base (http://fr.wikipedia.org/wiki/Table_des_caractères_Unicode/U0000)
