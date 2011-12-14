@@ -273,7 +273,7 @@ abstract class Node
      *
      * @return \Fooltext\Schema
      */
-    protected function getSchema()
+    public function getSchema()
     {
         return is_null($this->parent) ? null : $this->parent->getSchema();
     }
