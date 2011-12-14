@@ -1,31 +1,22 @@
 <?php
+/**
+ * This file is part of the Fooltext package.
+ *
+ * For copyright and license information, please view the
+ * LICENSE.txt file that was distributed with this source code.
+ *
+ * @package     Fooltext
+ * @subpackage  Store
+ * @author      Daniel Ménard <Daniel.Menard@laposte.net>
+ * @version     SVN: $Id$
+ */
 namespace Fooltext\Store;
 
-use Fooltext\Schema\Schema;
-use Fooltext\Document\Document;
-
+/**
+ * Représente une collection au sein d'une base de données.
+ */
 interface CollectionInterface
 {
-    /**
-     * Crée un nouvel objet Collection.
-     *
-     */
-    //public function __construct(StoreInterface $store, $name);
-
-    // Fonctions CRUD :
-    // - Create   -> put()
-    // - Retrieve -> find()
-    // - Update   -> put()
-    // - Delete   -> delete()
-
-    /**
-     * Crée un objet document en utilisant la classe indiquée dans la collection.
-     *
-     * @param array $data
-     * @return Document
-     */
-    public function createDocument(array $data = array());
-
     /**
      * Retourne un document unique identifié par son ID.
      *
@@ -44,7 +35,7 @@ interface CollectionInterface
      *
      * Vous pouvez passer en paramètre un tableau ou un objet itérable.
      *
-     * @param array|Traversable $doc
+     * @param array|Traversable $document
      */
     public function put($document);
 
@@ -67,6 +58,14 @@ interface CollectionInterface
     public function find($query, array $options);
 
     // Manipulation de plusieurs enregistrements à la fois
+
+    /**
+     * Crée un objet document en utilisant la classe indiquée dans la collection.
+     *
+     * @param array $data
+     * @return Document
+     */
+    public function createDocument(array $data = array());
 
     /**
      * Retourne plusieurs documents identifiés par leurs ID.
