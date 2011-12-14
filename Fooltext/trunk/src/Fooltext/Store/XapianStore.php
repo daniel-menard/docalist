@@ -14,6 +14,9 @@ namespace Fooltext\Store;
 
 use Fooltext\Schema\Schema;
 
+/**
+ * Une base de données Xapian.
+ */
 class XapianStore implements StoreInterface
 {
     /**
