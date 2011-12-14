@@ -12,6 +12,8 @@
  */
 namespace Fooltext\Store;
 
+use Fooltext\DocumentSet\DocumentSetInterface;
+
 /**
  * Représente une collection au sein d'une base de données.
  */
@@ -22,7 +24,7 @@ interface CollectionInterface
      *
      * @param int $id l'ID du document recherché.
      *
-     * @return Document le document recherché ou null si
+     * @return DocumentInterface le document recherché ou null si
      * l'ID indiqué n'existe pas dans la collection.
      */
     public function get($id);
@@ -51,9 +53,9 @@ interface CollectionInterface
     /**
      * Recherche des documents.
      *
-     * @param unknown_type $query
+     * @param Query $query
      * @param array $options
-     * @return DocumentSet
+     * @return DocumentSetInterface
      */
     public function find($query, array $options);
 
@@ -63,7 +65,7 @@ interface CollectionInterface
      * Crée un objet document en utilisant la classe indiquée dans la collection.
      *
      * @param array $data
-     * @return Document
+     * @return DocumentInterface
      */
     public function createDocument(array $data = array());
 
