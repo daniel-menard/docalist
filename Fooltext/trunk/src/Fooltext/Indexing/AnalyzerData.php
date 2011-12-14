@@ -14,6 +14,11 @@ namespace Fooltext\Indexing;
 
 use Fooltext\Schema\Field;
 
+/**
+ * Structure contenant le champ à analyser et dans laquelle les analyseurs
+ * stockent les termes qu'ils produisent.
+ *
+ */
 class AnalyzerData
 {
     /**
@@ -76,8 +81,8 @@ class AnalyzerData
     /**
      * Constructeur.
      *
-     * @param Field $field le champ à analyser.
-     * @param mixed $data les données du champ.
+     * @param Field $field la définition (dans le schéma) du champ à analyser.
+     * @param mixed $data le contenu du champ à analyser.
      */
     public function __construct(Field $field, $data)
     {
