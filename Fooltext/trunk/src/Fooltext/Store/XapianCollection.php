@@ -1,10 +1,22 @@
 <?php
+/**
+ * This file is part of the Fooltext package.
+ *
+ * For copyright and license information, please view the
+ * LICENSE.txt file that was distributed with this source code.
+ *
+ * @package     Fooltext
+ * @subpackage  Store
+ * @author      Daniel Ménard <Daniel.Menard@laposte.net>
+ * @version     SVN: $Id$
+ */
 namespace Fooltext\Store;
 
-use Fooltext\Schema\Schema\Collection;
-use Fooltext\Document\Document;
 use Fooltext\Indexing\AnalyzerData;
 
+/**
+ * Une collection au sein d'une base de données Xapian.
+ */
 class XapianCollection implements CollectionInterface
 {
     /**
@@ -116,15 +128,18 @@ class XapianCollection implements CollectionInterface
 //         }
 
         // Crée un document à partir des données en remplaçant les id des champs par leur nom
-        $document = $this->createDocument();
+        //$document = $this->createDocument();
+        $result = array();
         foreach($data as $id => $value)
         {
             $name = $this->collection->getFieldName($id);
-            if ($name) $document->add($name, $value);
+            //if ($name) $document->add($name, $value);
+            if ($name) $result[$name] = $value;
             // sinon : champ supprimé du schéma mais encore dans les données, on l'ignore
             // variante : si clé est une chaine, champ libre ?
         }
-        return $document;
+        //return $document;
+        return $this->createDocument($result);
     }
 
     /**
@@ -132,7 +147,7 @@ class XapianCollection implements CollectionInterface
      * est passé en paramètre.
      *
      * @param string $class
-     * @return Fooltext\Indexing\AnalyzerInterface $className
+     * @return Fooltext\Indexing\AnalyzerInterface
      */
     protected function getAnalyzer($class)
     {
@@ -164,6 +179,8 @@ class XapianCollection implements CollectionInterface
 
             $prefix = $id.':';
             $weight = $field->weight;
+var_export($weight);
+            if (is_null($weight)) $weight = 1;
 
             // Analyse le champ
             if ($classes = $field->analyzer)
