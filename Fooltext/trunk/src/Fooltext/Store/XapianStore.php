@@ -1,16 +1,36 @@
 <?php
+/**
+ * This file is part of the Fooltext package.
+ *
+ * For copyright and license information, please view the
+ * LICENSE.txt file that was distributed with this source code.
+ *
+ * @package     Fooltext
+ * @subpackage  Store
+ * @author      Daniel Ménard <Daniel.Menard@laposte.net>
+ * @version     SVN: $Id$
+ */
 namespace Fooltext\Store;
 
 use Fooltext\Schema\Schema;
-use Fooltext\Document\Document;
-use Fooltext\Indexing\AnalyzerData;
 
 class XapianStore implements StoreInterface
 {
     /**
      * Options par défaut utilisées par {@link __construct()}.
      *
-     * @var array
+     * @var array le soptions suivantes sont reconnues :
+     * - path : string, le path complet de la base de données. Obligatoire.
+     * - readonly : boolean, indique si la base doit être ouverte en mode
+     *   "lecture seule" ou en mode "lecture/écriture".
+     *   Optionnel, valeur par défaut : true.
+     * - create : boolean, indique que la base de données doit être créée si
+     *   elle n'existe pas déjà. Dans ce cas, la base est obligatoirement
+     *   ouverte en mode "lecture/écriture". Optionnel. Valeur par défaut : false.
+     * - overwrite : indique que la base de données doit être écrasée si elle
+     *   existe déjà. Optionnel, valeur par défaut : false.
+     * - schéma : le schema à utiliser pour créer la base. Obligatoire si
+     *   create ou overwrite sont à true. Optionnel sinon.
      */
     protected static $defaultOptions = array
     (
@@ -35,9 +55,19 @@ class XapianStore implements StoreInterface
      */
     protected $schema;
 
+    /**
+     * Liste des collections qui existent dans la base de données.
+     *
+     * @var array un tableau de la forme nom de la collection => objet XapianCollection.
+     * Initialement, le tableau ne contient que les noms des collections (la valeur associée
+     * est null). Dès qu'une base collection est ouverte (__get) elle est stockée dans le
+     * tableau qui ser ainsi de cache.
+     */
     protected $collections = array();
 
     /**
+     * Ouvre ou crée une base de données.
+     *
      * Ouverture en lecture seule d'une base existante :
      * array('path'=>'...')
      *
@@ -50,7 +80,6 @@ class XapianStore implements StoreInterface
      * Créer une base et écraser la base existante :
      * array('path'=>'...', 'overwrite'=>true, 'schema'=>$schema)
      *
-     * Enter description here ...
      * @param array $options
      */
     public function __construct(array $options = array())
@@ -88,7 +117,6 @@ class XapianStore implements StoreInterface
 
         // Charge la liste des collections
         $this->collections = array_fill_keys(array_keys($this->schema->getCollections()), null);
-
     }
 
     public function isReadonly()
@@ -127,7 +155,12 @@ class XapianStore implements StoreInterface
             throw new \Exception("La collection $name n'existe pas");
         }
 
-        return new XapianCollection($this, $this->db, $name);
+        if ($this->collections[$name] === null)
+        {
+            $this->collections[$name] = new XapianCollection($this, $this->db, $name);
+        }
+
+        return $this->collections[$name];
     }
 
     public function __isset($name)
