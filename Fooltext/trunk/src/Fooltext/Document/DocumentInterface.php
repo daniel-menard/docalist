@@ -15,8 +15,30 @@ namespace Fooltext\Document;
 /**
  * Interface de base pour représenter un document.
  *
+ * Un document est une liste ordonnée de champs composés d'un nom
+ * et d'une valeur.
+ *
+ * Un objet Document possède les caractéristiques suivantes :
+ * - Les champs sont itérables, vous pouvez utiliser un objet Document
+ *   dans une boucle foreach (interface IteratorAggragate).
+ * - Vous pouvez accèder aux champs comme si le document était un tableau
+ *   (interface ArrayAcces)
+ * - Les champs sont dénombrables, vous pouvez utiliser count($document)
+ *   pour obtenir le nombre de champs présents dans le document.
+ *   (interface Countable)
+ * - Vous pouvez accèder aux champs comme s'il s'agissait de propriétés
+ *   de l'objet Document. Ceci est possible grace aux méthodes magiques
+ *   de php __get, __set, __isset et __unset.
+ * - Un Document peut être créé à partir d'un tableau (constructeur) ou
+ *   convertit en tableau (méthode toArray()).
+ * - Un document peut être "dumpé" directement (echo $document), __toString()
+ *
+ * Remarques :
+ * - quand on accède à un champ qui n'existe pas ($doc->title ou $doc['title'])
+ *   l'objet Document doit retourner la valeur null. Il ne doit pas générer d'exception,
+ *   ni d'erreurs, ni de warnings.
  */
-interface DocumentInterface extends \IteratorAggregate, \Countable
+interface DocumentInterface extends \IteratorAggregate, \ArrayAccess, \Countable
 {
     /**
      * Construit un nouveau document contenant les données
@@ -63,4 +85,9 @@ interface DocumentInterface extends \IteratorAggregate, \Countable
      * @return array
      */
     public function toArray();
+
+    /**
+     * Affiche le contenu du document.
+     */
+    public function __toString();
 }
