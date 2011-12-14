@@ -12,69 +12,61 @@
  */
 namespace Fooltext\Document;
 
-/**
- * Représente un document de la base.
- *
- */
-class Document implements DocumentInterface
+class Document extends \ArrayObject implements DocumentInterface
 {
-    /**
-     * Les données du document.
-     *
-     * @var array
-     */
-    protected $data;
-
     public function __construct(array $data = array())
     {
-        $this->data = $data;
+        parent::__construct($data, \ArrayObject::ARRAY_AS_PROPS);
     }
 
-    public function __get($field)
-    {
-        return isset($this->data[$field]) ? $this->data[$field] : null;
-    }
-
-    public function __set($field, $value)
-    {
-        $this->data[$field] = $value;
-    }
-
-    public function __isset($field)
-    {
-        return isset($this->data[$field]);
-    }
-
-    public function __unset($field)
-    {
-        unset($this->data[$field]);
-    }
-
-    /**
-     * Retourne un itérateur sur la liste des champs présents
-     * dans le document.
-     *
-     * Permet d'utiliser un objet Document dans une boucle foreach.
-     *
-     * @return \ArrayAccess
+    /*
+     * Lorsqu'on essaie d'accèder à un champ qui n'existe pas, l'interface
+     * DocumentInterface spécifie qu'il faut retourner la valeur null.
+     * Ce n'est pas le comportement par défaut de ArrayAccess qui, dans ce
+     * cas, génère un warning "undefined index".
+     * Pour éviter cela, on surcharge offsetGets et on teste si le champ
+     * existe ou non.
+     * Coupe de chance : offsetGet est appellée quand on utilise la syntaxe
+     * $document['champ'] mais également quand on utilise la syntaxe
+     * $document->champ.
      */
-    public function getIterator()
+    public function offsetGet($field)
     {
-        return new \ArrayIterator($this->data);
-    }
-
-    /**
-     * Retourne le nombre de champs présents dans le document.
-     *
-     * @return int
-     */
-    public function count ()
-    {
-        return count($this->data);
+        if (! isset($this[$field])) return null;
+        return parent::offsetGet($field);
     }
 
     public function toArray()
     {
-        return $this->data;
+        return (array)$this;
     }
+
+    public function __toString()
+    {
+        $h = '';
+        foreach($this as $name=>$value)
+        {
+            if (is_scalar($value))
+            {
+                $h .= "$name: $value\n";
+            }
+            else
+            {
+                $h .= "$name: " . implode('¤', $value) . "\n";
+            }
+        }
+        return $h;
+    }
+
+
+    /*
+     * Les fonctions qui suivent (__get, __set, __isset, __unset) doivent
+     * être implémentées parce qu'elles figurent dans l'interface
+     * DocumentInterface, mais en fait, comme on initialise ArrayObject
+     * avec "ARRAY_AS_PROPS", elles ne seront jamais appellées.
+     */
+    public function __get($field) { }
+    public function __isset($field) { }
+    public function __unset($field) { }
+    public function __set($field,$value) { }
 }
