@@ -78,7 +78,7 @@ class oldqp
         // Un flag qui indique si on est au sein d'une expression entre guillemets ou non
         static $inString;
 
-        // Initialisation si on nous passe un nouvelle équation à parser
+        // Initialisation si on nous passe une nouvelle équation à parser
         if (!is_null($text))
         {
             $equation=$text;
@@ -294,7 +294,7 @@ class oldqp
                 // Sauvegarde le préfixe actuel
                 $save=$this->prefix;
 
-                // Vérifie que ce nom d'index existe et récupère le(s) prédixe(s) associé(s)
+                // Vérifie que ce nom d'index existe et récupère le(s) préfixe(s) associé(s)
                 $index=$this->token;
                 if (! isset($this->structure['index'][$index]))
                     throw new Exception("Impossible d'interroger sur le champ '$index' : index inconnu");
