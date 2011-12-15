@@ -31,7 +31,8 @@ $loader = new MapClassLoader
         'Xapian'         => __DIR__ . '/vendor/Xapian/xapian.php',
 		'XapianDatabase' => __DIR__ . '/vendor/Xapian/xapian.php',
         'XapianDocument' => __DIR__ . '/vendor/Xapian/xapian.php',
-        'Multimap'       => __DIR__ . '/src/Fooltext/Multimap.php',
+        'XapianQuery'    => __DIR__ . '/vendor/Xapian/xapian.php',
+		'Multimap'       => __DIR__ . '/src/Fooltext/Multimap.php',
     )
 );
 
