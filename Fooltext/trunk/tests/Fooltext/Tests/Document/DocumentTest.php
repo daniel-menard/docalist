@@ -69,6 +69,8 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
         $doc = new Document($data);
 
         // Vérifie qu'on peut modifier le document dans une boucle foreach
+        // c'est une limitation de ArrayAccess. En fait, le code ci-dessous,
+        // malgré le &$value ne fera rien.
         $data2 = (array)$doc;
         foreach($doc as $key => &$value)
         {
