@@ -13,150 +13,97 @@
 namespace Fooltext\Query;
 
 /**
- * Indexe un ISBN. Gère les isbn à 10 et 13 chiffres
- * - un isb13 est indexé tel quel :
- *   "978-2-1234-5680-3" -> keywords='9872123456803'
- * - un isbn10 et indexé comme isbn10 ET comme isbn13 :
- *  "2-1234-5680-2" -> keywords='2123456802', '9872123456803'
+ * Classe de base abstraite utilisée pour représenter une requête.
  *
+ * En interne, les requêtes sont représentées sous la forme d'un arbre.
+ * La classe Query est la classe de base utilisée pour stocker les noeuds
+ * de cet arbre.
+ *
+ * Certains types de requête dispose également d'options supplémentaires
+ * (par exemple, la classe {@link NearQuery} permet de spécifier le "gap"
+ * autorisé entre les termes).
  */
-class Query implements QueryInterface
+abstract class Query implements QueryInterface
 {
-    const
-        QUERY_AND = 1,
-        QUERY_OR = 2,
-        QUERY_NOT = 3,
-        QUERY_AND_MAYBE = 4,
-        QUERY_NEAR = 5,
-        QUERY_PHRASE = 6;
-
+    /**
+     * Tableau utilisé pour convertir les types de requête.
+     *
+     * @var array
+     */
     protected static $types = array
     (
         self::QUERY_AND => 'AND',
-        self::QUERY_OR => 'OR',
-        self::QUERY_NOT => 'NOT',
         self::QUERY_AND_MAYBE => 'AND_MAYBE',
+        self::QUERY_MATCH_ALL => 'ALL',
+        self::QUERY_MATCH_NOTHING => 'NOTHING',
         self::QUERY_NEAR => 'NEAR',
+        self::QUERY_NOT => 'NOT',
+        self::QUERY_OR => 'OR',
         self::QUERY_PHRASE => 'PHRASE',
+        self::QUERY_TERM => 'TERM',
+        self::QUERY_WILDCARD => 'WILDCARD'
     );
 
-    protected $type;
+    /**
+     * Le type de la requête.
+     *
+     * Il s'agit d'une des constantes QUERY_XXX (cf. {@link QueryInterface}).
+     *
+     * @var int
+     */
+    protected static $type = 0;
+
+    /**
+     * Le nom du champ sur lequel porte cette requête.
+     *
+     * @var string|null
+     */
+    protected $field;
+
+    /**
+     * Les arguments de la requête (i.e. les noeuds fils).
+     *
+     * @var array
+     */
     protected $args;
 
-    public function __construct($type, $left, $right = null)
+    public function __construct(array $args, $field = null)
     {
-        $this->type = $type;
-
-        if (is_null($left))
+        if (count($args) < 2)
         {
-            $left = $right;
-            $right = null;
-        }
-
-        $args = is_array($left) ? $left : array($left);
-
-        if (! is_null($right))
-        {
-            if (is_array($right)) $args = array_merge($args, $right);
-            else $args[] = $right;
+            var_export($args);
+            throw new \Exception('Vous devez indiquer au moins deux clauses.');
         }
         $this->args = $args;
-        return;
+        $this->field = $field;
+    }
 
-/*
-                                  RIGHT (r)
-                     1          2            3             4
-                  +------+------------+--------------+------------+
-                  | null |   scalar   |    array     |   query    |
-           +------+------+------------+--------------+------------+
-           |      |      |            |              |            |
-         A |  null|Xnull |X    r      |X     r       |X    r      |
-           |      |      |            |              |            |
-           +------+------+------------+--------------+------------+
-           |      |      |            |              |type=r.type?|
-         B |scalar|X l   |Xarray(l,r) |Xunshift(r,l) |  l+args(r) |
-           |      |      |            |              |: array(l,r)|
-LEFT (l)   +------+------+------------+--------------+------------+
-           |      |      |            |              |            |
-         C | array|X l   |X  l[]=r    |X merge(l,r)  |X   l[]=r   |
-           |      |      |            |              |            |
-           +------+------+------------+--------------+------------+
-           |      |      |type=l.type?|              |            |
-         D | query|X l   | args(l)+r  |Xunshift(r,l) | array(l,r) |
-           |      |      |:array(l,r) |              |+ same type?|
-           +------+------+------------+--------------+------------+
-*/
-        if (is_null($left) && is_null($right)) $args = null;    // A1
-        elseif (is_null($left)) $args = $right;                 // A2, A3, A4
-        elseif (is_null($right)) $args = $left;                 // B1, C1, D1
-        elseif (is_array($left))                                // C
+    public function optimize()
+    {
+        // Si les sous-requêtes sont du même type que la requête en cours,
+        // on les fusionne dans la requête en cours. Autrement dit, on supprime
+        // les parenthèses inutiles (associativité).
+        // Exemples :
+        // (a or b) OR (c or d) -> (a or b OR c or d)
+        // (a and b) AND (c and d) -> (a and b AND c and d)
+        for ($offset = count($this->args) - 1 ; $offset >= 0 ; $offset--)
         {
-            if (is_array($right))                               // C3
-            {
-                $args = array_merge($left, $right);
-            }
-            else                                                // C2, C4
-            {
-                $args = $left;
-                $args[] = $right;
-            }
-        }
-        elseif (is_array($right))                               // B3, D3
-        {
-            $args = $right;
-            array_unshift($args, $left);
-        }
-        elseif (is_scalar($left))                               // B
-        {
-            if (is_scalar($right))                              // B2
-            {
-                $args = array($left, $right);
-            }
-            elseif ($type = $right->getType())                  // B4, $right est une query
-            {
-                $right->getArgs();
-                array_unshift($args, $left);
-            }
-            else
-            {
-                $args = array($left, $right);                   // B4 également
-            }
-        }
-        elseif(is_scalar($right))                               // D2, D4 $left est une query
-        {
-            if ($type === $left->getType())                     // D2
-            {
-                $args = $left->getArgs();
-                $args[] = $right;
-            }
-            else                                                // D2 également
-            {
-                $args = array($left, $right);
-            }
-        }
-        else                                                    // D4 right et left sont des query
-        {
-            if ($type === $left->getType())
-            {
-                $args = array_merge($left->getArgs(), $right->getArgs());
-            }
-            elseif($type === $right->getType())
-            {
-                $args = $right->getArgs();
-                array_unshift($args, $left);
-            }
-            else
-            {
-                $args=array($left,$right);
-            }
-        }
+            $arg = $this->args[$offset];
+            if (! $arg instanceof Query) continue;
 
-        $this->args = $args;
+            $arg->optimize();
+            //if ($arg::$type === $this::$type)
+            if ($arg->getType() === $this->getType())
+            {
+                array_splice($this->args, $offset, 1, $arg->args);
+            }
+        }
+        return $this;
     }
 
     public function getType($asString = false)
     {
-        return $asString ? self::$types[$this->type] : $this->type;
+        return $asString ? self::$types[static::$type] : static::$type;
     }
 
     public function getArgs()
@@ -164,37 +111,22 @@ LEFT (l)   +------+------+------------+--------------+------------+
         return $this->args;
     }
 
-    public function dump($title='')
+    public function getField()
     {
-        if ($title) echo "<strong>$title</strong> :<br />";
-        echo $this->getType(true);
-        if ($this->args)
-        {
-            echo '<ul>';
-            foreach($this->args as $arg)
-            {
-                if ($arg instanceof QueryInterface)
-                {
-                    echo '<li>';
-                    $arg->dump();
-                    echo '</li>';
-                }
-                else
-                {
-                    echo "<li>$arg</li>";
-                }
-            }
-            echo '</ul>';
-        }
+        return $this->field;
     }
 
     public function __toString()
     {
-        if (empty($this->args)) return '{empty-query}';
-        if (! is_array($this->args)) return (string) $this->args;
-        if (count($this->args) === 1) return (string) reset($this->args);
+        if (count($this->args) === 1)
+        {
+            return
+                (is_null($this->field))
+                ? reset($this->args)
+                : $this->field . ':' . reset($this->args);
+        }
 
-        $h = '(';
+        if (is_null($this->field)) $h = '('; else $h = $this->field . ':(';
         foreach($this->args as $i=>$arg)
         {
             if ($i) $h .= ' ' . $this->getType(true) . ' ';
@@ -202,5 +134,41 @@ LEFT (l)   +------+------+------------+--------------+------------+
         }
         $h .= ')';
         return $h;
+    }
+
+    public function toXapian()
+    {
+        $xop = array
+        (
+            self::QUERY_AND => \XapianQuery::OP_AND,
+            self::QUERY_OR => \XapianQuery::OP_OR,
+            self::QUERY_NOT => \XapianQuery::OP_AND_NOT,
+            self::QUERY_AND_MAYBE => \XapianQuery::OP_AND_MAYBE,
+            self::QUERY_NEAR => \XapianQuery::OP_NEAR,
+            self::QUERY_PHRASE => \XapianQuery::OP_PHRASE,
+            self::QUERY_TERM => \XapianQuery::OP_OR
+        );
+
+        $args = $this->getArgs();
+        foreach ($args as & $arg)
+        {
+            if ($arg instanceof Query) $arg=$arg->toXapian();
+        }
+
+        if (! isset($xop[$this::$type]))
+        {
+            throw new \Exception('Type de requête non géré : ' . $this::$type);
+        }
+
+        if ($this::$type === self::QUERY_PHRASE) $this->option = 5;
+
+        if ($this->option)
+        {
+            return new \XapianQuery($xop[$this::$type], $args, $this->option);
+        }
+        else
+        {
+            return new \XapianQuery($xop[$this::$type], $args);
+        }
     }
 }
