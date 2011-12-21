@@ -12,10 +12,10 @@
  */
 namespace Fooltext\Query;
 
-class QueryAnd extends Query
+/**
+ * Requête qui retourne les documents qui contiennent tous les arguments.
+ */
+class AndQuery extends BooleanQuery
 {
-    public function __construct($left = null, $right = null)
-    {
-        parent::__construct(Query::QUERY_AND, $left, $right);
-    }
+    protected static $type = self::QUERY_AND;
 }

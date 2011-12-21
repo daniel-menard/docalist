@@ -12,10 +12,10 @@
  */
 namespace Fooltext\Query;
 
-class QueryNot extends Query
+/**
+ * Requête qui retourne les documents qui contiennent l'un des arguments.
+ */
+class OrQuery extends BooleanQuery
 {
-    public function __construct($left = null, $right = null)
-    {
-        parent::__construct(Query::QUERY_NOT, $left, $right);
-    }
+    protected static $type = self::QUERY_OR;
 }
