@@ -27,7 +27,7 @@ namespace Fooltext\Query;
 interface QueryInterface
 {
     /**
-     * Type d'une requête qui retourne les documents  qui contiennent l'un des arguments.
+     * Type d'une requête qui retourne les documents qui contiennent l'un des arguments.
      *
      * @var int
      */
