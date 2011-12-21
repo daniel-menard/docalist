@@ -104,16 +104,6 @@ interface QueryInterface
     const QUERY_MATCH_NOTHING = 10;
 
     /**
-     * Crée une nouvelle requête.
-     *
-     * @param array $args les arguments de la requête (i.e. les noeuds fils).
-     * @param string|null $field le nom du champ sur lequel porte cette requête.
-     *
-     * @throws \Exception si les paramètres indiqués ne sont pas valides.
-     */
-    public function __construct(array $args, $field = null);
-
-    /**
      * Optimise la requête.
      *
      * Exemples :
