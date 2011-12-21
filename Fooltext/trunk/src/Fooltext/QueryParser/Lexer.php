@@ -16,8 +16,8 @@ use Fooltext\Indexing\Lowercase;
 class Lexer
 {
     const
-        TOK_END = -1, TOK_ERROR = 0, TOK_BLANK = 1,
-        TOK_AND = 10, TOK_OR = 11, TOK_AND_NOT = 12, TOK_XOR = 13,
+        TOK_END = -1, TOK_BLANK = 1,
+        TOK_AND = 10, TOK_OR = 11, TOK_AND_NOT = 12,
         TOK_NEAR = 20, TOK_ADJ = 21,
         TOK_LOVE = 30, TOK_HATE = 31,
         TOK_INDEX_NAME = 40,
@@ -30,13 +30,11 @@ class Lexer
     protected static $tokenName=array
     (
         self::TOK_END => 'END',
-        self::TOK_ERROR => 'ERROR',
         self::TOK_BLANK => 'BLANK',
 
         self::TOK_AND => 'AND',
         self::TOK_OR => 'OR',
         self::TOK_AND_NOT => 'AND_NOT',
-        self::TOK_XOR => 'XOR',
 
         self::TOK_NEAR => 'NEAR',
         self::TOK_ADJ => 'ADJ',
@@ -119,7 +117,6 @@ class Lexer
             'not'  => self::TOK_AND_NOT,
             'but'  => self::TOK_AND_NOT, // ancien bis
 
-            'xor'  => self::TOK_XOR,
             'near' => self::TOK_NEAR,
             'adj'  => self::TOK_ADJ
         );
@@ -127,12 +124,14 @@ class Lexer
         // Initialisation si on nous passe une nouvelle équation à parser
         if (!is_null($equation))
         {
-            $equation = str_replace(array('[',']'), array('"@break ', ' @break"'), $equation);
-            $equation = strtr($equation, Lowercase::$map);
+            //$equation = str_replace(array('[',']'), array('"@break ', ' @break"'), $equation);
+            $map = Lowercase::$map;
+            unset($map['-']);
+            $equation = strtr($equation, $map);
+
             //$equation = Utils::convertString($equation, 'queryparser');
             $equation = trim($equation) . "\0";
             $this->equation = $equation;
-echo "equation: $equation<br />";
             $this->position = 0;
             $this->inString = false;
         }
@@ -145,11 +144,9 @@ echo "equation: $equation<br />";
         for(;;)
         {
             // Passe les blancs
-//            while($this->equation[$this->position] === ' ') ++$this->position;
-            while(false === strpos(self::$chars, $this->equation[$this->position])) ++$this->position;
+            while(false === strpos(self::$chars, $this->equation[$this->position])) ++$this->position; // strcspn ?
 
             $this->token = $this->equation[$this->position];
-//            echo "token = $this->token<br />";
             switch($this->token)
             {
                 case "\0": return $this->id = self::TOK_END;
@@ -158,8 +155,13 @@ echo "equation: $equation<br />";
                 case '(': ++$this->position; return $this->id = self::TOK_START_PARENTHESE;
                 case ')': ++$this->position; return $this->id = self::TOK_END_PARENTHESE;
                 case '*': ++$this->position; return $this->id = self::TOK_MATCH_ALL;
+
                 case ':':
-                case '=': ++$this->position; return $this->id = self::TOK_ERROR;
+                case '=': ++$this->position; break;
+                // explication : la requête commence par ":" ou "=" qui servent normallement
+                // pour indiquer les noms de champs. Comme ce n'est pas valide, on ignore les
+                // caractères comme s'il s'agissait d'un blanc.
+
                 case '"':
                     ++$this->position;
                     $this->inString = ! $this->inString;
@@ -181,14 +183,13 @@ echo "equation: $equation<br />";
                     return $this->read();
 
                 default:
-                    $len = 1 + strspn($this->equation, 'abcdefghijklmnopqrstuvwxyz0123456789', $this->position + 1);
+                    $len = 1 + strspn($this->equation, 'abcdefghijklmnopqrstuvwxyz0123456789?*', $this->position + 1);
                     $this->token = substr($this->equation, $this->position, $len);
                     $this->position += $len;
 
                     // Un mot avec troncature à droite ?
-                    if ($this->equation[$this->position] === '*')
+                    if (strcspn($this->token, '?*')< strlen($this->token))
                     {
-                        ++$this->position;
                         return $this->id = ($this->inString ? self::TOK_PHRASE_WILD_TERM : self::TOK_WILD_TERM);
                     }
 
@@ -206,7 +207,6 @@ echo "equation: $equation<br />";
 
                     // Un nom d'index ?
                     while($this->equation[$this->position] === ' ') ++$this->position; // Espaces optionnels entre le nom d'index et le signe ":"
-                    //while(false === strpos(self::$chars, $this->equation[$this->position])) ++$this->position;// Passe les blancs
                     if ($this->equation[$this->position] === ':' || $this->equation[$this->position] === '=')
                     {
                         ++$this->position;
@@ -258,7 +258,7 @@ echo "equation: $equation<br />";
         for($secu=0; $secu < 100; $secu++)
         {
             echo '<code>',$this->getTokenName(), ' : [', $this->getTokenText(), ']</code><br />';
-            if ($this->getToken() === self::TOK_END || $this->getToken() === self::TOK_ERROR) break;
+            if ($this->getToken() === self::TOK_END) break;
             $this->read();
         }
     }
