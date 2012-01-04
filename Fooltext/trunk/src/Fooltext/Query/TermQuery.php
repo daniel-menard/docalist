@@ -30,4 +30,9 @@ class TermQuery extends Query
         $this->args = array($term);
         $this->field = $field;
     }
+
+    public function getTerm()
+    {
+        return $this->args[0];
+    }
 }
