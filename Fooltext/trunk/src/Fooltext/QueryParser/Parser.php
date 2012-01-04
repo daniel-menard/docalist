@@ -39,13 +39,6 @@ class Parser
     protected $lexer;
 
     /**
-     * Le champ sur lequel porte la recherche.
-     *
-     * @var string
-     */
-    protected $field;
-
-    /**
      * Initialise l'analyseur.
      *
      */
@@ -59,13 +52,10 @@ class Parser
         $this->token = $this->lexer->read($equation);
     }
 
-    public function parseQuery($equation, $field = null)
+    public function parseQuery($equation, $defaultField = null)
     {
         // Initialise le lexer
         $this->read($equation);
-
-        // Stocke le champ en cours
-        $this->field = $field;
 
         // Analyse l'équation
         $query = $this->parseExpression();
@@ -73,6 +63,10 @@ class Parser
         // Vérifie qu'on a tout lu
         if ($this->token !== Lexer::TOK_END)
             echo "L'EQUATION N'A PAS ETE ANALYSEE COMPLETEMENT <br />";
+
+        // Définit le champ sur lequel porte la requête
+        if ($defaultField) $query->setField($defaultField);
+
         // Retourne la requête
         return $query;
     }
@@ -134,7 +128,7 @@ class Parser
 
                 case Lexer::TOK_END_PARENTHESE:
                     $this->read();
-                    break; // une parenthèse fermante superflue. Ignore silencieusement l'erreur
+                    break 2;
 
                 case Lexer::TOK_END:
                     break 2;
@@ -143,6 +137,7 @@ class Parser
                     $query[] = $this->parseCompound();
                     break;
 
+                default: die('here parseExpression');
 //                 case Lexer::TOK_RANGE_START:
 //                 case Lexer::TOK_RANGE_END:
 //                     // pour le moment, on ignore
@@ -151,9 +146,9 @@ class Parser
             }
         }
 
-        $query     = (count($query)     > 1) ? new OrQuery ($query    , $this->field) : reset($query);
-        $loveQuery = (count($loveQuery) > 1) ? new AndQuery($loveQuery, $this->field) : reset($loveQuery);
-        $hateQuery = (count($hateQuery) > 1) ? new AndQuery($hateQuery, $this->field) : reset($hateQuery);
+        $query     = (count($query)     > 1) ? new OrQuery ($query)     : reset($query);
+        $loveQuery = (count($loveQuery) > 1) ? new AndQuery($loveQuery) : reset($loveQuery);
+        $hateQuery = (count($hateQuery) > 1) ? new AndQuery($hateQuery) : reset($hateQuery);
 
         if (! $query)
         {
@@ -161,16 +156,16 @@ class Parser
         }
         elseif ($loveQuery)
         {
-            $query = new AndMaybeQuery(array($loveQuery, $query), $this->field);
+            $query = new AndMaybeQuery(array($loveQuery, $query));
         }
 
         if ($hateQuery)
         {
-            $query = new NotQuery(array($query ? $query : new MatchAllQuery(), $hateQuery), $this->field);
+            $query = new NotQuery(array($query ? $query : new MatchAllQuery(), $hateQuery));
         }
 
-        if (is_string($query)) $query = new TermQuery($query, $this->field);
-        if ($query === false) $query = new MatchNothingQuery($this->field);
+        if (is_string($query)) $query = new TermQuery($query);
+        if ($query === false) $query = new MatchNothingQuery();
 
         return $query;
     }
@@ -186,33 +181,23 @@ class Parser
             case Lexer::TOK_ADJ:
                 $term = $this->lexer->getTokenText();
                 $this->read();
-                return new TermQuery($term, $this->field);
+                return new TermQuery($term);
 
             case Lexer::TOK_WILD_TERM:
-                $query = new WildcardQuery($this->lexer->getTokenText(), $this->field);
+                $query = new WildcardQuery($this->lexer->getTokenText());
                 $this->read();
                 return $query;
 
             case Lexer::TOK_INDEX_NAME:
 
-                // Sauvegarde le préfixe actuel
-                $previousField = $this->field;
-
-                // Vérifie que ce nom d'index existe et récupère le(s) préfixe(s) associé(s)
-                $this->field = $this->lexer->getTokenText();
-//                 if (! isset($this->structure['index'][$index]))
-//                 {
-//                     throw new \Exception("Impossible d'interroger sur le champ '$index' : index inconnu");
-//                 }
-
-//                 $this->prefix=$this->structure['index'][$index];
+                // Stocke le nouveau champ courant
+                $field = $this->lexer->getTokenText();
 
                 // Analyse l'expression qui suit
                 $this->read();
                 $query = $this->parseCompound();
+                $query->setField($field);
 
-                // Restaure le préfixe précédent
-                $this->field = $previousField;
                 return $query;
 
             case Lexer::TOK_START_PARENTHESE:
@@ -238,28 +223,24 @@ class Parser
                 {
                     if ($this->token===Lexer::TOK_PHRASE_WILD_TERM)
                     {
-                        $terms[] = new WildcardQuery($this->lexer->getTokenText(), $this->field);
+                        $terms[] = new WildcardQuery($this->lexer->getTokenText());
                     }
                     else
                     {
-                        $terms[] = $this->lexer->getTokenText();
+                        $terms[] = new TermQuery($this->lexer->getTokenText());
                     }
                     $this->read();
                 }
                 while ($this->token===Lexer::TOK_PHRASE_TERM || $this->token===Lexer::TOK_PHRASE_WILD_TERM);
 
-                if (count($terms) == 1)
-                {
-                    $term = reset($terms);
-                    if (is_string($term)) return new TermQuery($term, $this->field);
-                    return $term; // WildcardQuery
-                }
+                // @todo: si token = ~10 -> gérer le gap
 
-                return new PhraseQuery($terms, $this->field);
+                if (count($terms) == 1) return $terms[0];
+                return new PhraseQuery($terms);
 
             case Lexer::TOK_MATCH_ALL:
                 $this->read();
-                return new MatchAllQuery($this->field);
+                return new MatchAllQuery();
 
             case Lexer::TOK_LOVE:
             case Lexer::TOK_HATE:
@@ -270,7 +251,7 @@ class Parser
                 break;
 
             case Lexer::TOK_END:
-                return new MatchNothingQuery($this->field);
+                return new MatchNothingQuery();
 //         TOK_END = -1, TOK_BLANK = 1,
 //         TOK_AND_NOT = 12,
 //         TOK_RANGE_START = 60, TOK_RANGE_END = 61;
@@ -367,6 +348,6 @@ class Parser
         //echo $this->lexer->getTokenName($token), "(", implode(', ', $args), ")<br />";
 
         $class = 'Fooltext\\Query\\' . $class;
-        return new $class($args, $this->field, $option); // TODO: 1=window size du ADJ, à mettre en config
+        return new $class($args, null, $option); // TODO: 1=window size du ADJ, à mettre en config
     }
 }
