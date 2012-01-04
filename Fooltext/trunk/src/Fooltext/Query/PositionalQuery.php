@@ -50,9 +50,9 @@ abstract class PositionalQuery extends Query
      *
      * @throws \Exception si les paramètres indiqués ne sont pas valides.
      */
-    public function __construct(array $args, $field = null, $gap = null)
+    public function __construct(array $args, $field = null, $gap = 0)
     {
-        parent::__construct($args, $field, $gap);
+        parent::__construct($args, $field);
         $this->gap = $gap;
     }
 
