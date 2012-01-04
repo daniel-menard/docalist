@@ -140,6 +140,13 @@ interface QueryInterface
     public function getField();
 
     /**
+     * Définit le nom du champ sur lequel porte la requête.
+     *
+     * @param string $field
+     */
+    public function setField($field);
+
+    /**
      * Retourne une représentation textuelle de la requête.
      *
      * @return string
