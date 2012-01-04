@@ -14,7 +14,7 @@ namespace Fooltext\Query;
 
 /**
  * Requête qui retourne les documents qui contiennent les arguments indiqués
- * dans l'ordre indiqués à une certaine distance maximale les uns des autres.
+ * dans l'ordre indiqué à une certaine distance maximale les uns des autres.
  */
 class PhraseQuery extends PositionalQuery
 {
@@ -22,6 +22,8 @@ class PhraseQuery extends PositionalQuery
 
     public function __toString()
     {
-        return '"' . implode(' ', $this->args) . '"';
+        $field = is_null($this->field) ? '' : ($this->field . ':');
+
+        return $field . '"' . implode(' ', $this->args) . '"';
     }
 }
