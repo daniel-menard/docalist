@@ -19,8 +19,8 @@ namespace Fooltext\Query;
  * La classe Query est la classe de base utilisée pour stocker les noeuds
  * de cet arbre.
  *
- * Certains types de requête dispose également d'options supplémentaires
- * (par exemple, la classe {@link NearQuery} permet de spécifier le "gap"
+ * Certains types de requête disposent également d'options supplémentaires
+ * (par exemple, la classe {@link PositionalQuery} permet de spécifier le "gap"
  * autorisé entre les termes).
  */
 abstract class Query implements QueryInterface
@@ -47,7 +47,7 @@ abstract class Query implements QueryInterface
     /**
      * Le type de la requête.
      *
-     * Il s'agit d'une des constantes QUERY_XXX (cf. {@link QueryInterface}).
+     * Il s'agit d'une des constantes QUERY_* (cf. {@link QueryInterface}).
      *
      * @var int
      */
@@ -119,6 +119,11 @@ abstract class Query implements QueryInterface
         return $this->args;
     }
 
+    public function setField($field)
+    {
+        $this->field = $field;
+    }
+
     public function getField()
     {
         return $this->field;
@@ -134,7 +139,7 @@ abstract class Query implements QueryInterface
                 : $this->field . ':' . reset($this->args);
         }
 
-        if (is_null($this->field)) $h = '('; else $h = $this->field . ':(';
+        $h = is_null($this->field) ? '(' : ($this->field . ':(');
         foreach($this->args as $i=>$arg)
         {
             if ($i) $h .= ' ' . $this->getType(true) . ' ';
