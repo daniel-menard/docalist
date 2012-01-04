@@ -45,6 +45,10 @@ class Parser
      */
     protected $field;
 
+    /**
+     * Initialise l'analyseur.
+     *
+     */
     public function __construct()
     {
         $this->lexer = new Lexer();
@@ -61,7 +65,7 @@ class Parser
         $this->read($equation);
 
         // Stocke le champ en cours
-        $this->prefix = $field;
+        $this->field = $field;
 
         // Analyse l'équation
         $query = $this->parseExpression();
