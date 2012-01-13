@@ -81,7 +81,7 @@ class Field extends Node
             }
 
             $interfaces = class_implements($analyzer);
-            if (! isset($interfaces['Fooltext\Indexing\AnalyzerInterface']))
+            if (! isset($interfaces['Fooltext\\Indexing\\AnalyzerInterface']))
             {
                 throw new \Exception("La classe $analyzer n'est pas un analyseur");
             }
