@@ -13,10 +13,15 @@
 namespace Fooltext\Schema;
 
 /**
- * Un champ simple.
+ * Un champ au sein d'une collection.
  */
 class Field extends Node
 {
+    /**
+     * Propriétés par défaut d'un champ.
+     *
+     * @var array
+     */
     protected static $defaults = array
     (
         // Identifiant (numéro unique) du champ
@@ -26,7 +31,7 @@ class Field extends Node
         'name' => '',
 
         // Type du champ
-        'type' => 'text', //array('text','bool','int','autonumber'),
+        'type' => 'text',
 
         // Traduction de la propriété type en entier
         '_type' => null,
@@ -37,36 +42,28 @@ class Field extends Node
         // Description
         'description' => '',
 
-        // Faut-il utiliser les mots-vides de la base
-//         'defaultstopwords' => true,
+    	'widget' => 'textbox',
+    	'datasource' => '',
 
-        // Liste spécifique de mots-vides à appliquer à ce champ
-//         'stopwords' => '',
-
-    //        'widget' => array('display'),
-
-    	'widget' => 'textbox', //array('textbox', 'textarea', 'checklist', 'radiolist', 'select'),
-    	'datasource' => '', // array('pays','langues','typdocs'),
-
-    	'analyzer' => null, //array('DefaultMapper', 'HtmlMapper'),
+    	'analyzer' => null,
 
     	'weight' => 1,
     );
 
-    protected static $labels = array
-    (
-        'main' => 'Champ',
-        'add' => 'Nouveau champ',
-        'remove' => 'Supprimer le champ %2', // %1=name, %2=type
-    );
-
-    protected static $icons = array
-    (
-        'image' => 'zone.png',
-        'add' => 'zone--plus.png',
-        'remove' => 'zone--minus.png',
-    );
-
+    /**
+     * Setter pour la propriété 'analyzer' du champ.
+     *
+     * Vérifie que les analyseurs indiqués existent et stocke le résultat sous
+     * forme de tableau. Le nom de classe d'un analyseur peut être indiqué avec ou
+     * sans namespace. Si aucune namespace ne figure dans le nom de la classe, la
+     * méthode ajoute le namespace Fooltext\Indexing\.
+     *
+     * @param string|array $value le nom de l'analyseur (ou un tableau d'analyseurs)
+     * à utiliser pour ce champ.
+     *
+     * @throws \Exception Si l'analyseur indiqué n'existe pas ou s'il n'implémente
+     * pas l'interface {@link Fooltext\Indexing\AnalyzerInterface}.
+     */
     public function setAnalyzer($value)
     {
         if (is_scalar($value)) $value = array($value);
@@ -81,6 +78,12 @@ class Field extends Node
             if (! class_exists($analyzer))
             {
                 throw new \Exception("Classe $analyzer non trouvée");
+            }
+
+            $interfaces = class_implements($analyzer);
+            if (! isset($interfaces['Fooltext\Indexing\AnalyzerInterface']))
+            {
+                throw new \Exception("La classe $analyzer n'est pas un analyseur");
             }
         }
         $this->data['analyzer'] = $value;
