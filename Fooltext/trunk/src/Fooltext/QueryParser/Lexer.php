@@ -129,8 +129,10 @@ class Lexer
             unset($map['-']);
             $equation = strtr($equation, $map);
 
-            //$equation = Utils::convertString($equation, 'queryparser');
+            $equation = preg_replace_callback('~(?:[a-z0-9]\.){2,9}~i', array(__CLASS__, 'acronymToTerm'), $equation);
+
             $equation = trim($equation) . "\0";
+
             $this->equation = $equation;
             $this->position = 0;
             $this->inString = false;
@@ -175,7 +177,8 @@ class Lexer
                     // Début d'une chaine : ignore les caractères spéciaux et retourne le premier mot
                     if (false === $pt = strpos($this->equation, '"', $this->position))
                     {
-                        throw new \Exception('guillemet fermant non trouvé');
+                        //throw new \Exception('guillemet fermant non trouvé');
+                        break;
                     }
                     $len = $pt - $this->position;
                     $string = strtr(substr($this->equation, $this->position, $len), '+-():=[]', '       ');
@@ -262,4 +265,17 @@ class Lexer
             $this->read();
         }
     }
+
+    /**
+     * Fonction utilitaire utilisée par {@link tokenize()} pour convertir
+     * les acronymes en mots
+     *
+     * @param array $matches
+     * @return string
+     */
+    protected static function acronymToTerm($matches)
+    {
+        return str_replace('.', '', $matches[0]);
+    }
+
 }
