@@ -12,6 +12,8 @@
  */
 namespace Fooltext\Schema;
 
+use XMLWriter;
+
 /**
  * Classe de base (abstraite) représentant un noeud dans un schéma.
  *
@@ -107,7 +109,7 @@ abstract class Node extends BaseNode
     }
 
     /**
-     * Retourne la propriété ayant le nom est indiqué ou null si la propriété
+     * Retourne la propriété ayant le nom indiqué ou null si la propriété
      * demandée n'existe pas.
      *
      * Si la classe contient un getter pour cette propriété (i.e. une méthode nommée
@@ -140,7 +142,7 @@ abstract class Node extends BaseNode
     /**
      * Ajoute ou modifie une propriété.
      *
-     * Si la valeur indiquée est null, la propriété est supprimée de l'objet
+     * Si la valeur indiquée est null, la propriété est supprimée du noeud
      * ou revient à sa valeur par défaut si c'est une propriété prédéfinie.
      *
      * Si la classe contient un setter pour cette propriété (i.e. une méthode nommée
@@ -210,7 +212,7 @@ abstract class Node extends BaseNode
         return static::$defaults;
     }
 
-    protected function _toXml(\XMLWriter $xml)
+    protected function _toXml(XMLWriter $xml)
     {
         foreach($this->data as $name=>$value)
         {
@@ -263,11 +265,11 @@ abstract class Node extends BaseNode
      * si la valeur contient plus d'une entité xml. Dans le cas contraire, elle
      * écrit directement la valeur.
      *
-     * @param \XMLWriter $xml le writer à utiliser.
+     * @param XMLWriter $xml le writer à utiliser.
      * @param string $name le nom de la propriété à générer.
      * @param string $value sa valeur.
      */
-    protected function writeXmlString(\XMLWriter $xml, $name, $value)
+    protected function writeXmlString(XMLWriter $xml, $name, $value)
     {
         if (preg_match_all('~[&<>"]~', $value, $matches) > 1)
         {
@@ -281,7 +283,7 @@ abstract class Node extends BaseNode
         }
     }
 
-    protected function _toJson($indent = false, $currentIndent = '', $colon = ':')
+    protected function _toJson($indent = 0, $currentIndent = '', $colon = ':')
     {
         $h ='';
         foreach($this->data as $name=>$value)
