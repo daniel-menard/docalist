@@ -15,9 +15,9 @@ namespace Fooltext\Schema;
 /**
  * Un alias. Collection d'objets {@link AliasIndex}.
  */
-class Alias extends NodesCollection
+class Alias extends Node
 {
-    protected static $defaultProperties = array
+    protected static $defaults = array
     (
         // Identifiant (numéro unique) de l'alias (non utilisé)
     	'_id' => null,
@@ -31,26 +31,7 @@ class Alias extends NodesCollection
         // Description de l'index
         'description' => '',
 
-        // Type d'index : 'probabilistic' ou 'boolean'
-        'type' => array('probabilistic', 'boolean'),
-
-        // Traduction de la propriété type en entier
-        '_type' => null,
-    );
-
-    protected static $validChildren = array('aliasindex');
-
-    protected static $labels = array
-    (
-    	'main' => 'Alias',
-        'add' => "Nouvel alias",
-        'remove' => "Supprimer l'alias %2", // %1=name, %2=type
-    );
-
-    protected static $icons = array
-    (
-        'image' => 'key.png',
-        'add' => 'key--plus.png',
-        'remove' => 'key--minus.png',
+    	'widget' => 'textbox', //array('textbox', 'textarea', 'checklist', 'radiolist', 'select'),
+    	'datasource' => '', // array('pays','langues','typdocs'),
     );
 }
