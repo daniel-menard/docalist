@@ -13,27 +13,12 @@
 namespace Fooltext\Schema;
 
 /**
- * Liste de collections. Collection d'objets {@link Collection}.
+ * Liste de collections définies dans un schéma.
+ *
+ * C'est une collection d'objets {@link Collection}.
  */
 class Collections extends Nodes
 {
     protected static $class = 'Fooltext\\Schema\\Collection';
-
     protected $nextid = 'a';
-/*
-    protected static $knownProperties = array
-    (
-        '_lastid' => null,
-    );
-
-    protected static $labels = array
-    (
-        'main' => 'Liste des collections',
-    );
-
-    protected static $icons = array
-    (
-        'image' => 'zone--arrow.png',
-    );
-*/
 }
