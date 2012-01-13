@@ -13,7 +13,7 @@
 namespace Fooltext\Schema;
 
 /**
- * Liste de collections définies dans un schéma.
+ * Liste des collections définies dans un schéma.
  *
  * C'est une collection d'objets {@link Collection}.
  */
