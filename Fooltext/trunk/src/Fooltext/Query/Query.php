@@ -88,24 +88,6 @@ abstract class Query implements QueryInterface
 
     public function optimize()
     {
-        // Si les sous-requêtes sont du même type que la requête en cours,
-        // on les fusionne dans la requête en cours. Autrement dit, on supprime
-        // les parenthèses inutiles (associativité).
-        // Exemples :
-        // (a or b) OR (c or d) -> (a or b OR c or d)
-        // (a and b) AND (c and d) -> (a and b AND c and d)
-        for ($offset = count($this->args) - 1 ; $offset >= 0 ; $offset--)
-        {
-            $arg = $this->args[$offset];
-            if (! $arg instanceof Query) continue;
-
-            $arg->optimize();
-            //if ($arg::$type === $this::$type)
-            if ($arg->getType() === $this->getType())
-            {
-                array_splice($this->args, $offset, 1, $arg->args);
-            }
-        }
         return $this;
     }
 
