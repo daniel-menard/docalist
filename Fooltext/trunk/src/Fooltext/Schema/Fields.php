@@ -17,7 +17,10 @@ namespace Fooltext\Schema;
  */
 class Fields extends Nodes
 {
-    protected static $defaultProperties = array
+    protected static $class = 'Fooltext\\Schema\\Field';
+
+/*
+    protected static $knownProperties = array
     (
         '_lastid' => null,
     );
@@ -33,4 +36,5 @@ class Fields extends Nodes
     (
         'image' => 'zone--arrow.png',
     );
+*/
 }
