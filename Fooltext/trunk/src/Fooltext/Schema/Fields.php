@@ -13,28 +13,11 @@
 namespace Fooltext\Schema;
 
 /**
- * Liste des champs. Collection d'objets {@link Field}.
+ * Liste de champs définies dans une collection.
+ *
+ * C'est une collection d'objets {@link Field}.
  */
 class Fields extends Nodes
 {
     protected static $class = 'Fooltext\\Schema\\Field';
-
-/*
-    protected static $knownProperties = array
-    (
-        '_lastid' => null,
-    );
-
-    protected static $validChildren = array('field', 'groupfield');
-
-    protected static $labels = array
-    (
-        'main' => 'Liste des champs',
-    );
-
-    protected static $icons = array
-    (
-        'image' => 'zone--arrow.png',
-    );
-*/
 }
