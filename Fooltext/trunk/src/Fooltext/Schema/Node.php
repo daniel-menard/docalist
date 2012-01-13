@@ -16,7 +16,7 @@ namespace Fooltext\Schema;
  * Classe de base (abstraite) représentant un noeud dans un schéma.
  *
  * Un noeud est un objet qui peut contenir des propriétés (cf. {@link __get()},
- * {@link __set()}, {@link __isset()}, {@link __unset()} et {@link getProperties()}).
+ * {@link __set()}, {@link __isset()}, {@link __unset()} et {@link getFata()}).
  *
  * Un noeud dispose de propriétés par défaut (cf. {@link getKnownProperties()})
  * qui sont créées automatiquement et sont toujours disponibles.
@@ -38,7 +38,7 @@ namespace Fooltext\Schema;
  * @package     Fooltext
  * @subpackage  Schema
  */
-abstract class Node
+abstract class Node extends BaseNode
 {
     /**
      * Propriétés prédéfinies et valeurs par défaut des propriétés de ce type de noeud.
@@ -74,7 +74,7 @@ abstract class Node
      *
      * @var array
      */
-    protected static $knownProperties = array();
+    protected static $defaults = array();
 
 
     /**
@@ -117,25 +117,9 @@ abstract class Node
         'remove' => 'zone--minus.png',
     );
 
+    protected static $nodes = array();
 
-    /**
-     * Propriétés du noeud.
-     *
-     * @var array
-     */
-    protected $properties = array();
-
-
-    /**
-     * Noeud parent de ce noeud.
-     *
-     * Cette propriété est initialisée automatiquement lorsqu'un noeud
-     * est ajouté dans une {@link NodesCollection collection}.
-     *
-     * @var Nodes
-     */
-    protected $parent = null;
-
+    protected static $ignore = array();
 
     /**
      * Crée un nouveau noeud.
@@ -143,13 +127,42 @@ abstract class Node
      * Un noeud contient automatiquement toutes les propriétés par défaut définies
      * pour ce type de noeud et celles-ci apparaissent en premier.
      *
-     * @param array $properties propriétés du noeud.
+     * @param array $data propriétés du noeud.
      */
-    public function __construct(array $properties = array())
+    public function __construct(array $data = array())
     {
         // on commence par les propriétés par défaut pour qu'elles apparaissent
         // en premier et dans l'ordre indiqué dans la classe.
-        $this->properties = array_merge(static::getDefaultValue(), $properties);
+//        $data = array_merge(static::getDefaultValue(), $data);
+
+        $this->data = static::$defaults;
+
+        foreach (static::$nodes as $name => $class)
+        {
+            if (isset($data[$name]))
+            {
+                $nodes = $data[$name];
+                unset($data[$name]);
+                if (is_array($nodes))
+                {
+                    $nodes = new $class($nodes);
+                }
+                elseif (! $nodes instanceof $class)
+                {
+                    throw new \InvalidArgumentException("type incorrect : $name");
+                }
+                $this->data[$name] = $nodes;
+            }
+            else
+            {
+                $this->data[$name] = new $class();
+            }
+        }
+
+        foreach($data as $name => $value)
+        {
+            $this->__set($name, $value);
+        }
     }
 
 
@@ -157,15 +170,27 @@ abstract class Node
      * Retourne la propriété dont le nom est indiqué ou null si la propriété
      * demandée n'existe pas.
      *
+     * Si la classe contient un getter pour cette propriété (i.e. une méthode nommée
+     * get + nom de la propriété), celui-ci est appellé.
+     *
      * @param string $name
      * @return mixed
      */
     public function __get($name)
     {
-        $getter = 'get' . ucfirst($name);
-        if (method_exists($this, $getter)) return $this->$getter($name);
+        $getter = 'get' . $name; // pas besoin de ucfirst() : "php methods are case insensitive" (php.net/functions.user-defined)
 
-        return array_key_exists($name, $this->properties) ? $this->properties[$name] : null;
+        if (method_exists($this, $getter))
+        {
+            return $this->$getter($name);
+        }
+
+        if (array_key_exists($name, $this->data))
+        {
+            return $this->data[$name];
+        }
+
+        return null;
     }
 
 
@@ -175,13 +200,20 @@ abstract class Node
      * Si la valeur indiquée est <code>null</code>, la propriété est supprimée de
      * l'objet ou revient à sa valeur par défaut si c'est une propriété prédéfinie.
      *
+     * Si la classe contient un setter pour cette propriété (i.e. une méthode nommée
+     * set + nom de la propriété), celui-ci est appellé pour modifier la propriété.
+     *
      * @param string $name
      * @param mixed $value
      */
     public function __set($name, $value = null)
     {
-        $setter = 'set' . ucfirst($name);
-        if (method_exists($this, $setter)) return $this->$setter($value);
+        $setter = 'set' . $name;
+
+        if (method_exists($this, $setter))
+        {
+            return $this->$setter($value);
+        }
 
         if (is_null($value))
         {
@@ -189,7 +221,7 @@ abstract class Node
         }
         else
         {
-            $this->properties[$name] = $value;
+            $this->data[$name] = $value;
         }
     }
 
@@ -203,7 +235,7 @@ abstract class Node
      */
     public function __isset($name)
     {
-        return array_key_exists($name, $this->properties);
+        return array_key_exists($name, $this->data);
     }
 
 
@@ -219,102 +251,15 @@ abstract class Node
      */
     public function __unset($name)
     {
-        if (isset(static::$knownProperties[$name]))
+        if (isset(static::$defaults[$name]))
         {
-            $this->properties[$name] = self::getDefaultValue($name);
+            $this->data[$name] = static::$defaults[$name];
         }
         else
         {
-            unset($this->properties[$name]);
+            unset($this->data[$name]);
         }
     }
-
-
-    /**
-     * Retourne le type du noeud.
-     *
-     * La méthode retourne le {@link NodeTypes nom symbolique} associé au noeud.
-     *
-     * @return string
-     */
-//     public function getType()
-//     {
-//         return NodesTypes::classToNodetype(get_class($this));
-//     }
-
-
-    /**
-     * Retourne le noeud parent de ce noeud ou <code>null</code> si le noeud
-     * n'a pas encore été ajouté comme fils d'un noeud existant.
-     *
-     * @return \Fooltext\Schema\Node
-     */
-    protected function getParent()
-    {
-        return $this->parent;
-    }
-
-
-    /**
-     * Modifie le parent de ce noeud.
-     *
-     * @param Nodes $parent
-     * @return $this
-     */
-    protected function setParent(Nodes $parent)
-    {
-        $this->parent = $parent;
-    }
-
-
-    /**
-     * Retourne le schéma dont fait partie ce noeud ou <code>null</code> si
-     * le noeud n'a pas encore été ajouté à un schéma.
-     *
-     * @return \Fooltext\Schema
-     */
-    public function getSchema()
-    {
-        return is_null($this->parent) ? null : $this->parent->getSchema();
-    }
-
-
-    /**
-     * Retourne un tableau contenant toutes les propriétés du noeud.
-     *
-     * @return array
-     */
-    public function getProperties()
-    {
-        return $this->properties;
-    }
-
-
-    /**
-     * Contrairement à un objet {@link NodesCollection}, un noeud de base ne contient pas de fils.
-     *
-     * @return array
-     */
-//     public function hasChildren()
-//     {
-//         return false;
-//     }
-
-
-    /**
-     * Construit un noeud à partir d'un tableau contenant ses propriétés.
-     *
-     * @param string $nodetype le type du noeud à créer.
-     * @param array $properties un tableau contenant les propriétés du noeud créé.
-     *
-     * @return Node
-     */
-//     protected static function create($nodetype, array $properties = array())
-//     {
-//         $class = NodesTypes::nodetypeToClass($nodetype);
-//         if (! isset($properties['name'])) $properties['name'] = $nodetype; // à revoir
-//         return new $class($properties);
-//     }
 
 
     /**
@@ -322,45 +267,9 @@ abstract class Node
      *
      * @return array()
      */
-    protected static function getKnownProperties()
+    public static function getDefaults()
     {
-        return static::$knownProperties;
-    }
-
-
-    /**
-     * Retourne la valeur par défaut d'une propriété ou de l'ensemble
-     * des propriétés prédéfinies si aucun nom n'est indiqué.
-     *
-     *
-     * @param string $name
-     * @return null|mixed|array Si $name a été indiqué, la méthode retourne la
-     * valeur par défaut de la propriété, ou null si la propriété demandée n'est
-     * pas prédéfinie.
-     * Si $name est absent, la méthode retourne un tableau contenant les valeurs
-     * par défaut de toutes les propriétés prédéfinies.
-     */
-    protected static function getDefaultValue($name = null)
-    {
-        // Retourne la valeur par défaut d'une propriété particulière
-        if ($name)
-        {
-            if (isset(static::$knownProperties[$name]['default']))
-            {
-                return static::$knownProperties[$name]['default'];
-            }
-
-            return null;
-        }
-
-        // Retourne une tableau contenant les valeurs par défaut de toutes les propriétés
-        $result = array();
-        foreach(static::$knownProperties as $name => $params)
-        {
-            $result[$name] = isset($params['default']) ? $params['default'] : null;
-        }
-
-        return $result;
+        return static::$defaults;
     }
 
 
@@ -579,27 +488,63 @@ abstract class Node
      */
     protected function _toXml(\XMLWriter $xml)
     {
-        foreach($this->properties as $name=>$value)
+        foreach($this->data as $name=>$value)
         {
-            if (isset(static::$knownProperties[$name]) && self::getDefaultValue($name) === $value) continue;
+            if (in_array($name, static::$ignore)) continue;
 
-            if (is_bool($value)) $value = $value ? 'true' : 'false';
-            if (is_scalar($value))
+//            if (array_key_exists($name, static::$defaults) && static::$defaults[$name] === $value) continue;
+
+            if (is_bool($value))
             {
-                $xml->writeElement($name, $value);
+                $value = $value ? 'true' : 'false';
             }
-            else if (is_array($value))
+
+            if (is_null($value))
+            {
+                $xml->writeElement($name); // empty node
+            }
+            elseif (is_scalar($value))
+            {
+                $this->writeXmlString($xml, $name, $value);
+            }
+            elseif (is_array($value))
             {
                 $xml->startElement($name);
                 foreach($value as $item)
                 {
-                    $xml->writeElement('item', $item);
+                    $this->writeXmlString($xml, 'item', $item);
                 }
                 $xml->endElement();
+            }
+            elseif ($value instanceof Nodes)
+            {
+                $xml->startElement($name);
+//                 $xml->writeAttribute('nextid', $value->getNextId());
+
+                $value->_toXml($xml);
+                $xml->endElement();
+            }
+            else
+            {
+                var_export($value);
+                throw new \Exception('non géré');
             }
         }
     }
 
+    private function writeXmlString(\XMLWriter $xml, $name, $value)
+    {
+        if (preg_match_all('~[&<>"]~', $value, $matches) > 1)
+        {
+            $xml->startElement($name);
+            $xml->writeCdata($value);
+            $xml->endElement();
+        }
+        else
+        {
+            $xml->writeElement($name, $value);
+        }
+    }
 
     /**
     * Fonction utilitaire utilisée par {@link xmlToObject()} pour convertir la
@@ -622,27 +567,34 @@ abstract class Node
     }
 
 
-
-    /**
-     * Méthode utilitaire utilisée par {@link \Fooltext\Schema}. Sérialise le noeud
-     * au format JSON.
-     *
-     * La méthode ne générère que les propriétés du noeud. La méthode appelante doit générer
-     * les accolades ouvrantes et fermantes.
-     *
-     * @param \XMLWriter $xml
-     */
     protected function _toJson($indent = false, $currentIndent = '', $colon = ':')
     {
         //$h = $currentIndent . json_encode('_nodetype') . $colon . json_encode($this->getType()) . ',';
         $h ='';
-        foreach($this->properties as $name=>$value)
+        foreach($this->data as $name=>$value)
         {
-            if (isset(static::$knownProperties[$name]) && self::getDefaultValue($name) === $value) continue;
+            if (in_array($name, static::$ignore)) continue;
 
-            $h .= $currentIndent . json_encode($name) . $colon . json_encode($value) . ',';
+//             if (isset(static::$defaults[$name]) && static::$defaults[$name] === $value) continue;
+
+            $h .= $currentIndent . json_encode($name) . $colon;
+            if ($value instanceof Nodes)
+            {
+                $h .= $currentIndent . '[';
+                $h .= $value->_toJson($indent, $currentIndent . str_repeat(' ', $indent), $colon);
+                $h .= $currentIndent. '],';
+            }
+            else
+            {
+                $h .= json_encode($value) . ',';
+            }
         }
 
         return rtrim($h, ',');
+    }
+
+    public function getIterator()
+    {
+        return new \ArrayIterator($this->data);
     }
 }
