@@ -12,8 +12,10 @@
  */
 namespace Fooltext\Schema;
 
-use Fooltext\Schema\Field;
-use Fooltext\Schema\Exception\NotFound;
+use DOMDocument;
+use SimpleXmlElement;
+use DOMElement;
+use XMLWriter;
 
 /**
  * Représente un schéma.
@@ -89,7 +91,7 @@ class Schema extends Node
         if (is_string($xml))
         {
             // Crée un document XML
-            $dom = new \DOMDocument();
+            $dom = new DOMDocument();
             $dom->preserveWhiteSpace = false;
 
             libxml_use_internal_errors(true);
@@ -108,7 +110,7 @@ class Schema extends Node
         }
 
         // Un objet DOMDocument existant
-        elseif ($xml instanceof \DOMDocument)
+        elseif ($xml instanceof DOMDocument)
         {
             $dom = $xml;
         }
@@ -116,7 +118,7 @@ class Schema extends Node
         // Un objet SimpleXmlElement existant
         elseif ($xml instanceof SimpleXmlElement)
         {
-            $dom = dom_import_simplexml($sxe)->ownerDocument;
+            $dom = dom_import_simplexml($xml)->ownerDocument;
         }
         else
         {
@@ -131,10 +133,10 @@ class Schema extends Node
      * Méthode récursive utilisée par {@link fromXml()} pour charger un schéma
      * au format XML.
      *
-     * @param \DOMElement $node
+     * @param DOMElement $node
      * @throws \Exception
      */
-    protected static function domToArray(\DOMElement $node)
+    protected static function domToArray(DOMElement $node)
     {
         // Les attributs ne sont pas autorisés dans les noeuds
         if ($node->hasAttributes())
@@ -264,7 +266,7 @@ class Schema extends Node
      */
     public function toXml($indent = false)
     {
-        $xml = new \XMLWriter();
+        $xml = new XMLWriter();
         $xml->openMemory();
 
         if ($indent === true) $indent = 4; else $indent=(int) $indent;
