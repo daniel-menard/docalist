@@ -17,16 +17,16 @@ namespace Fooltext\Schema;
  */
 class Field extends Node
 {
-    protected static $defaultProperties = array
+    protected static $defaults = array
     (
-        // Nom du champ, d'autres noms peuvent être définis via des alias
-        'name' => '',
-
         // Identifiant (numéro unique) du champ
 		'_id' => null,
 
+        // Nom du champ, d'autres noms peuvent être définis via des alias
+        'name' => '',
+
         // Type du champ
-        'type' => array('text','bool','int','autonumber'),
+        'type' => 'text', //array('text','bool','int','autonumber'),
 
         // Traduction de la propriété type en entier
         '_type' => null,
@@ -45,10 +45,10 @@ class Field extends Node
 
     //        'widget' => array('display'),
 
-    	'widget' => array('textbox', 'textarea', 'checklist', 'radiolist', 'select'),
-    	'datasource' => array('pays','langues','typdocs'),
+    	'widget' => 'textbox', //array('textbox', 'textarea', 'checklist', 'radiolist', 'select'),
+    	'datasource' => '', // array('pays','langues','typdocs'),
 
-    	'analyzer' => array('DefaultMapper', 'HtmlMapper'),
+    	'analyzer' => null, //array('DefaultMapper', 'HtmlMapper'),
 
     	'weight' => 1,
     );
@@ -66,4 +66,23 @@ class Field extends Node
         'add' => 'zone--plus.png',
         'remove' => 'zone--minus.png',
     );
+
+    public function setAnalyzer($value)
+    {
+        if (is_scalar($value)) $value = array($value);
+
+        foreach($value as & $analyzer)
+        {
+            if (false === strpos($analyzer, '\\'))
+            {
+                $analyzer = 'Fooltext\\Indexing\\' . $analyzer;
+            }
+
+            if (! class_exists($analyzer))
+            {
+                throw new \Exception("Classe $analyzer non trouvée");
+            }
+        }
+        $this->data['analyzer'] = $value;
+    }
 }
