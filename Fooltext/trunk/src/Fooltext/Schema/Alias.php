@@ -13,10 +13,15 @@
 namespace Fooltext\Schema;
 
 /**
- * Un alias. Collection d'objets {@link AliasIndex}.
+ * Un alias au sein d'une collection.
  */
 class Alias extends Node
 {
+    /**
+     * Propriétés par défaut d'un alias.
+     *
+     * @var array
+     */
     protected static $defaults = array
     (
         // Identifiant (numéro unique) de l'alias (non utilisé)
@@ -25,13 +30,10 @@ class Alias extends Node
         // Nom de l'alias
         'name' => '',
 
-        // Libellé de l'index
+        // Libellé de l'alias
         'label' => '',
 
-        // Description de l'index
+        // Description de l'alias
         'description' => '',
-
-    	'widget' => 'textbox', //array('textbox', 'textarea', 'checklist', 'radiolist', 'select'),
-    	'datasource' => '', // array('pays','langues','typdocs'),
     );
 }
