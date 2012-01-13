@@ -54,40 +54,22 @@ class Schema extends Node
         'lastupdate' => "",
     );
 
+    /**
+     * Liste des collections de noeuds dont dispose un schéma.
+     *
+     * @var array un tableau de la forme "nom de la propriété" => "classe utilisée".
+     */
     protected static $nodes = array
     (
     	'collections' => 'Fooltext\\Schema\\Collections',
     );
 
-    protected static $ignore = array('name', '_stopwords');
-
     /**
-     * Crée un nouveau schéma.
+     * Liste des propriétés à ignorer lorsqu'un schéma est sérialisé en xml ou en json.
      *
-     * Un noeud contient automatiquement toutes les propriétés par défaut définies
-     * pour ce type de noeud et celles-ci apparaissent en premier.
-     *
-     * @param array $data propriétés du noeud.
+     * @var array un tableau de la forme "nom de la propriété" => true|false.
      */
-//     public function __construct(array $data = array())
-//     {
-//         parent::__construct($data);
-
-//         if (isset($data['collections']))
-//         {
-//             $collections = $data['collections'];
-//             unset($data['collections']);
-//             if (! $collections instanceof Collections) $collections = new Collections($collections);
-//         }
-//         else
-//         {
-//             $collections = new Collections();
-//         }
-
-//         $this->version = 2;
-//         $this->data['collections'] = $collections;
-//     }
-
+    protected static $ignore = array('_stopwords' => true);
 
     /**
      * Crée un schéma depuis un source xml.
@@ -123,7 +105,6 @@ class Schema extends Node
                 libxml_clear_errors();
                 throw new \Exception($message);
             }
-
         }
 
         // Un objet DOMDocument existant
@@ -146,6 +127,13 @@ class Schema extends Node
         return new self(self::domToArray($dom->documentElement));
     }
 
+    /**
+     * Méthode récursive utilisée par {@link fromXml()} pour charger un schéma
+     * au format XML.
+     *
+     * @param \DOMElement $node
+     * @throws \Exception
+     */
     protected static function domToArray(\DOMElement $node)
     {
         // Les attributs ne sont pas autorisés dans les noeuds
@@ -296,7 +284,6 @@ class Schema extends Node
         return $xml->outputMemory(true);
     }
 
-
     /**
      * Crée un schéma à partir d'une chaine au format JSON.
      *
@@ -338,12 +325,11 @@ class Schema extends Node
         return $h;
     }
 
-
     /**
      * Retourne le schéma en cours.
      *
      * Pour un Schéma, getSchema() n'a pas trop d'utilité, mais ça permet
-     * d'interrompre la chaine getSchema() des classes dérivées qui font toutes
+     * d'interrompre la chaine getSchema() des noeuds qui font tous
      * return parent::getSchema().
      *
      * @return $this
@@ -357,7 +343,7 @@ class Schema extends Node
      * Setter pour la propriété 'stopwords'.
      *
      * A chaque fois qu'on modifie la propriété 'stopwords', cela modifie également
-     * la proprété cachée 'stopwords' qui est une version tableau (les mots-vides sont
+     * la propriété cachée 'stopwords' qui est une version tableau (les mots-vides sont
      * tokenisés et sont indexés dans les clés du tableau) de la chaine 'stopwords'.
      *
      * @param string $stopwords
@@ -369,6 +355,7 @@ class Schema extends Node
         if (is_string($stopwords))
         {
             $stopwords = str_word_count($stopwords, 1, '0123456789@_');
+            // @todo : utiliser l'analyseur lowerCase.
         }
         elseif (is_array($stopwords))
         {
@@ -379,124 +366,15 @@ class Schema extends Node
         $this->data['_stopwords'] = $stopwords;
     }
 
-    /**
-     * Ajoute une collection dans le schéma.
-     *
-     * @param Collection $collection la collection à ajouter.
-     *
-     * @return \Fooltext\Schema\Schema $this
-     *
-     * @throws \Exception si la collection a déjà un id.
-     */
-//     public function addCollection(Collection $collection)
-//     {
-//         if (! is_null($collection->_id))
-//         {
-//             throw new \Exception('La collection a déjà un _id');
-//         }
-
-//         if (is_null($this->_lastid))
-//         {
-//             $collection->_id = $this->_lastid = 'a';
-//         }
-//         else
-//         {
-//             $collection->_id = ++$this->_lastid;
-//         }
-
-//         $this->data['collections']->add($collection);
-
-//         return $this;
-//     }
-
-    /**
-     * Indique si le shéma contient des collections.
-     *
-     * @return boolean
-     */
-//     public function hasCollections()
-//     {
-//         return ! empty($this->data['collections']);
-//     }
-
-    /**
-     * Indique si le schéma contient la collection dont le nom est indiqué.
-     *
-     * @param string $name
-     * @return boolean
-     */
-//     public function hasCollection($name)
-//     {
-//         return (isset($this->data['collections'][$name])) || (isset($this->id[$name]));
-//     }
-
-    /**
-     * Retourne la collection dont le nom est indiqué, génère une
-     * exception si celle-ci n'existe pas.
-     *
-     * @param string $name
-     * @return Collection
-     * @throws NotFound
-     */
-//     public function getCollection($name)
-//     {
-//         if (isset($this->data['collections'][$name]))
-//         {
-//             return $this->data['collections'][$name];
-//         }
-
-//         throw new NotFound("La collection $name n'existe pas.");
-//     }
-
-    /**
-     * Retourne la liste des collections définies dans le schéma.
-     *
-     * @return Collections
-     */
-//     public function getCollections()
-//     {
-//         return $this->data['collections'];
-//     }
-
-    /**
-     * Supprime la collection ayant le nom ou l'id indiqué.
-     *
-     * Génère une exception si la collection indiquée n'existe pas.
-     *
-     * @param string $name
-     * @throws NotFound
-     * @return \Fooltext\Schema\Schema $this
-     */
-//     public function deleteCollection($name)
-//     {
-//         if (isset($this->data['collections'][$name]))
-//         {
-// //             unset($this->id[$this->data['fields'][$name]->_id]);
-//             unset($this->data['collections'][$name]);
-//             return $this;
-//         }
-
-//         throw new \NotFound("Le champ $name n'existe pas.");
-//     }
-
-//     public function getCollectionName($id)
-//     {
-//         throw new \Exception('todo');
-//         if (isset($this->id[$id])) return $this->id[$id];
-//         return null;
-//     }
-
     public function validate()
     {
         return true;
-        return array(
-            'error 1',
-            'autre erreur',
-        );
     }
+
     public function compile()
     {
     }
+
     public function setLastUpdate()
     {
         return true;
