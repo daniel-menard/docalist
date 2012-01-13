@@ -58,11 +58,22 @@ class Parser
         $this->read($equation);
 
         // Analyse l'équation
-        $query = $this->parseExpression();
+        $queries = array();
+        do
+        {
+            $query = $this->parseExpression();
+            if (! $query instanceof MatchNothingQuery) $queries[] = $query;
+        } while ($this->token !== Lexer::TOK_END);
 
-        // Vérifie qu'on a tout lu
-        if ($this->token !== Lexer::TOK_END)
-            echo "L'EQUATION N'A PAS ETE ANALYSEE COMPLETEMENT <br />";
+        if (count($queries) === 0) return new MatchNothingQuery();
+        if (count($queries) > 1)
+        {
+            $query = new OrQuery($queries);
+        }
+        else
+        {
+            $query = $queries[0];
+        }
 
         // Définit le champ sur lequel porte la requête
         if ($defaultField) $query->setField($defaultField);
@@ -146,7 +157,7 @@ class Parser
             }
         }
 
-        $query     = (count($query)     > 1) ? new OrQuery ($query)     : reset($query);
+        $query     = (count($query)     > 1) ? new OrQuery ($query)     : reset($query); // reset : retourne null si vide
         $loveQuery = (count($loveQuery) > 1) ? new AndQuery($loveQuery) : reset($loveQuery);
         $hateQuery = (count($hateQuery) > 1) ? new AndQuery($hateQuery) : reset($hateQuery);
 
@@ -242,16 +253,19 @@ class Parser
                 $this->read();
                 return new MatchAllQuery();
 
-            case Lexer::TOK_LOVE:
-            case Lexer::TOK_HATE:
-                // la requête contient juste "+" ou "-"
-                // on ignore silencieusement
-                die('here');
-                $this->read();
-                break;
+//             case Lexer::TOK_LOVE:
+//             case Lexer::TOK_HATE:
+//                 // la requête contient juste "+" ou "-"
+//                 // on ignore silencieusement
+// //                die('here');
+//                 $this->read();
+//                 break;
 
             case Lexer::TOK_END:
                 return new MatchNothingQuery();
+
+            default:
+                throw new \Exception('Token inattendu : ' . $this->lexer->getTokenText());
 //         TOK_END = -1, TOK_BLANK = 1,
 //         TOK_AND_NOT = 12,
 //         TOK_RANGE_START = 60, TOK_RANGE_END = 61;
@@ -330,7 +344,7 @@ class Parser
             if ($this->token !== Lexer::TOK_ADJ) break;
             $this->read();
         }
-        if (count($args) === 1 ) return reset($args);
+        if (count($args) === 1 ) return $args[0];
         echo "ADJ(", implode(', ', $args), ")<br />";
         return new NearQuery($args, 1); // TODO: 1=window size du ADJ, à mettre en config
     }
