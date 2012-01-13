@@ -51,12 +51,12 @@ class Words implements AnalyzerInterface
     }
 
     /**
-    * Fonction utilitaire utilisée par {@link tokenize()} pour convertir
-    * les acronymes en mots
-    *
-    * @param array $matches
-    * @return string
-    */
+     * Fonction utilitaire utilisée par {@link tokenize()} pour convertir
+     * les acronymes en mots
+     *
+     * @param array $matches
+     * @return string
+     */
     protected static function acronymToTerm($matches)
     {
         return str_replace('.', '', $matches[0]);
