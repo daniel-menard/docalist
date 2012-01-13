@@ -13,28 +13,11 @@
 namespace Fooltext\Schema;
 
 /**
- * Liste des alias. Collection d'objets {@link Alias}.
+ * Liste des alias définis dans une collection.
+ *
+ * C'est une collection d'objets {@link Alias}.
  */
 class Aliases extends Nodes
 {
     protected static $class = 'Fooltext\\Schema\\Alias';
-
-/*
-    protected static $knownProperties = array
-    (
-        '_lastid' => null,
-    );
-
-    protected static $validChildren = array('alias');
-
-    protected static $labels = array
-    (
-    	'main' => 'Liste des alias',
-    );
-
-    protected static $icons = array
-    (
-        'image' => 'key--arrow.png',
-    );
-*/
 }
