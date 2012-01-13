@@ -13,7 +13,7 @@
 namespace Fooltext\Schema;
 
 /**
- * Liste de champs définies dans une collection.
+ * Liste des champs définis dans une collection.
  *
  * C'est une collection d'objets {@link Field}.
  */
