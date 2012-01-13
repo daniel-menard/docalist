@@ -11,165 +11,170 @@
  * @version     SVN: $Id$
  */
 namespace Fooltext\Schema;
+use Fooltext\Schema\Exception\NotFound;
 
 /**
  * Classe abstraite représentant une collection de noeuds.
  *
- * Une collection de noeud est un type particulier de {@link Node noeud} qui
- * peut contenir d'autres noeuds.
+ * Seul des objets Node peuvent être stockés dans cette collection.
+ * Chaque objet est indexé à la fois par son nom et par son ID.
  *
- * Chaque collection définit les types des noeuds qui sont autorisés comme fils
- * (cf {@link getValidChildren()} et {@link isValidChildren()}).
- *
- * Certains noeuds sont prédéfinis et existent toujours au sein de la collection
- * (cf. {@link getDefaultChildren()}.
- *
- * La collection peut être manipulée en utilisant les méthodes {@link addChild()},
- * {@link getChildren()}, {@link getChild()}, {@link hasChildren()},
- * {@link hasChild()}, {@link removeChildren()} et {@link removeChild()}.
+ * La collection se charge d'attribuer un ID aux objets qui son ajoutés et
+ * stocke le dernier ID utiisé.
  *
  * @package     Fooltext
  * @subpackage  Schema
  */
-abstract class Nodes extends Node
+abstract class Nodes extends BaseNode
 {
     /**
-     * Retourne la propriété dont le nom est indiqué ou null si la propriété
-     * demandée n'existe pas.
+     * Type des noeuds que contient cette collection.
      *
-     * @param string $name
-     * @return mixed
+     * Tous les noeuds ajoutés à la collection doivent descendre de la classe indiquée.
+     *
+     * @var string
      */
-    public function __get($name)
-    {
-        $getter = 'get' . ucfirst($name);
-
-        if (method_exists($this, $getter))
-        {
-            return $this->$getter($name);
-        }
-
-        if (property_exists($this, $name))
-        {
-            return $this->$name;
-        }
-
-        if (array_key_exists($name, $this->properties))
-        {
-            return $this->properties[$name];
-        }
-
-        return null;
-    }
-
+    protected static $class = null;
 
     /**
-     * Ajoute ou modifie une propriété.
+     * ID qui sera atribué au prochain noeud ajouté dans la collection.
      *
-     * Si la valeur indiquée est <code>null</code>, la propriété est supprimée de
-     * l'objet ou revient à sa valeur par défaut si c'est une propriété prédéfinie.
+     * Par défaut, les ID sont numériques et commencent à 1. Les classes descendantes
+     * peuvent changer ça en surchargeant la valeur par défaut de la propriété.
+     * Par exemple, la classe collections gère des ID composés de lettres
+     * (a, b, .., z, aa, ab, .., az, etc.) en initialisant nextid à 'a'.
      *
-     * @param string $name
-     * @param mixed $value
+     * @var int|string
      */
-    public function __set($name, $value = null)
-    {
-        $setter = 'set' . ucfirst($name);
-        if (method_exists($this, $setter))
-        {
-            return $this->$setter($value);
-        }
-
-        if (property_exists($this, $name))
-        {
-            throw new Exception\ReadonlyProperty($name);
-        }
-        //parent::__set($name, $value);
-        if (is_null($value))
-        {
-            $this->__unset($name);
-        }
-        else
-        {
-            $this->properties[$name] = $value;
-        }
-
-    }
-
+    protected $nextid = 1;
 
     /**
-     * Indique si une propriété existe.
+     * Liste des noms des noeuds présents dans la collection, indexés par ID.
      *
-     * @param string $name
-     *
-     * @return bool
+     * @var array Name => ID
      */
-    public function __isset($name)
+    protected $id = array();
+
+    public function __construct(array $data = array())
     {
-        if (property_exists($this, $name))
+        foreach ($data as $name => $child)
         {
-            return true;
+            $this->add($child);
         }
-
-        return array_key_exists($name, $this->properties);
-    }
-
-
-    /**
-     * Supprime la propriété indiquée ou la réinitialise à sa valeur par défaut
-     * s'il s'agit d'une propriété prédéfinie.
-     *
-     * Sans effet si la propriété n'existe pas.
-     *
-     * @param string $name
-     *
-     * @return $this
-     */
-    public function __unset($name)
-    {
-        $setter = 'set' . ucfirst($name);
-        if (method_exists($this, $setter))
-        {
-            return $this->$setter(null);
-        }
-
-        if (property_exists($this, $name))
-        {
-            throw new Exception\ReadonlyProperty($name);
-        }
-
-        parent::__unset($name);
     }
 
     /**
-     * Ajoute un noeud fils à la propriété children du noeud.
+     * Ajoute un noeud dans la collection.
      *
-     * @param Node $child le noeud fils à ajouter
+     * @param Node|array $child le noeud fils à ajouter
      *
-     * @return $this
+     * @return \Fooltext\Schema\Nodes $this
      *
-     * @throws Exception si le noeud n'a pas de nom ou si ce nom existe déjà ou ce type
-     * de noeud n'est pas autorisé comme enfant.
+     * @throws Exception Si le noeud n'a pas de nom ou si un noeud portant ce nom figure
+     * déjà dans la collection.
      */
-    protected function addChild(array & $where, Node $child)
+    public function add($child)
     {
+        // Valide
+        if (is_array($child))
+        {
+            $child = new static::$class($child);
+        }
+        elseif (! $child instanceof static::$class)
+        {
+            throw new \InvalidArgumentException("Type incorrect : $name");
+        }
+
+        // Vérifie que le noeud a un nom
         $name = $child->name;
         if (empty($name))
         {
             throw new \Exception('Le noeud à ajouter doit avoir un nom');
         }
 
-        if (isset($where[$name]))
+        // Attribue un id au noeud
+        if (is_null($child->_id) || $child->_id === '')
+        {
+            $child->_id = $this->nextid++;
+        }
+
+        if (isset($this->data[$name]))
         {
             throw new \Exception("Il existe déjà un noeud avec le nom $name");
         }
 
+        // Ajoute le noeud
         $child->parent = $this;
-
-        $where[$name] = $child;
+        $this->data[$name] = $child;
+        $this->id[$child->_id] = $name;
 
         return $this;
     }
+
+    /**
+     * Indique si la collection contient un noeud ayant le nom ou l'id indiqué.
+     *
+     * @param string $name
+     * @return boolean
+     */
+    public function has($name)
+    {
+        return isset($this->data[$name]) || isset($this->id[$name]);
+    }
+
+    /**
+     * Retourne le noeud de la collection ayant le nom ou l'id indiqué.
+     *
+     * Génère une exception si le noeud indiqué n'existe pas.
+     *
+     * @param string|int $name
+     * @throws NotFound
+     */
+    public function get($name)
+    {
+        if (isset($this->data[$name])) return $this->data[$name];
+        if (isset($this->id[$name])) return $this->data[$this->id[$name]];
+        throw new NotFound("Le noeud $name n'existe pas.");
+    }
+
+    /**
+     * Retourne un tableau contenant tous les noeuds présents dans la collection.
+     *
+     * @return array
+     */
+    public function getAll()
+    {
+        return $this->data;
+    }
+
+    /**
+     * Supprime le noeud ayant le nom ou l'id indiqué.
+     *
+     * Génère une exception si le noeud indiqué n'existe pas.
+     *
+     * @param string[int $name
+     * @throws NotFound
+     * @return \Fooltext\Schema\Nodes $this
+     */
+    public function delete($name)
+    {
+        if (isset($this->data['fields'][$name]))
+        {
+            unset($this->id[$this->data['fields'][$name]->_id]);
+            unset($this->data['fields'][$name]);
+            return $this;
+        }
+
+        if (isset($this->id[$name]))
+        {
+            unset($this->data[$this->id[$name]]);
+            unset($this->id[$name]);
+            return $this;
+        }
+
+        throw new NotFound("Le noeud $name n'existe pas.");
+    }
+
 
 
     /**
@@ -204,42 +209,35 @@ abstract class Nodes extends Node
      */
     protected function _toXml(\XMLWriter $xml)
     {
-        parent::_toXml($xml);
-
-        if (isset($this->children))
+        foreach($this->data as $child)
         {
-            $xml->startElement('children');
-            foreach($this->children as $child)
-            {
-                $xml->startElement($child->getType());
-                $child->_toXml($xml);
-                $xml->endElement();
-            }
+            $xml->startElement('item');
+            $child->_toXml($xml);
             $xml->endElement();
         }
-
-        return $this;
     }
 
     protected function _toJson($indent = false, $currentIndent = '', $colon = ':')
     {
-        $h = parent::_toJson($indent, $currentIndent, $colon);
-        if (isset($this->children))
+        $h = '';
+        foreach($this->data as $name => $child)
         {
-            $h .= ',' . $currentIndent;
-            $h .= json_encode('children') . $colon;
-            $h .= $currentIndent . "[";
-            $currentIndent = $currentIndent . str_repeat(' ', $indent);
-            $childIndent = $currentIndent . str_repeat(' ', $indent);
-            foreach($this->children as $child)
-            {
-                $h .= $currentIndent . '{';
-                $h .= $child->_toJson($indent, $childIndent, $colon);
-                $h .= $currentIndent. '},';
-            }
-            $h = rtrim($h, ',');
-            $h .= substr($currentIndent, 0, -$indent) . "]";
+//            $h .= $currentIndent . json_encode($name) . $colon;
+            $h .= $currentIndent . '{';
+            $h .= $child->_toJson($indent, $currentIndent . str_repeat(' ', $indent), $colon);
+            $h .= $currentIndent. '},';
         }
-        return $h;
+
+        return rtrim($h, ',');
+    }
+
+    public function getNextId()
+    {
+        return $this->nextid;
+    }
+
+    public function isEmpty()
+    {
+        return empty($this->data);
     }
 }
