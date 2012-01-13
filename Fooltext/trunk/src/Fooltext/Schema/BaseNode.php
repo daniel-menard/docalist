@@ -12,6 +12,10 @@
  */
 namespace Fooltext\Schema;
 
+use IteratorAggregate;
+use ArrayIterator;
+use XMLWriter;
+
 /**
  * Classe de base parente des classes Node et Nodes.
  *
@@ -19,7 +23,7 @@ namespace Fooltext\Schema;
  * @package     Fooltext
  * @subpackage  Schema
  */
-abstract class BaseNode implements \IteratorAggregate
+abstract class BaseNode implements IteratorAggregate
 {
     /**
      * Les données du noeud.
@@ -35,7 +39,7 @@ abstract class BaseNode implements \IteratorAggregate
      * Cette propriété est initialisée automatiquement lorsqu'un noeud
      * est ajouté dans une {@link Nodes collection de noeuds}.
      *
-     * @var \Fooltext\Schema\Nodes
+     * @var Nodes
      */
     protected $parent = null;
 
@@ -44,7 +48,7 @@ abstract class BaseNode implements \IteratorAggregate
      * Retourne le noeud parent de ce noeud ou null si le noeud
      * n'a pas encore été ajouté comme fils d'un noeud existant.
      *
-     * @return \Fooltext\Schema\Nodes
+     * @return Nodes
      */
     protected function getParent()
     {
@@ -54,7 +58,7 @@ abstract class BaseNode implements \IteratorAggregate
     /**
      * Modifie le parent de ce noeud.
      *
-     * @param \Fooltext\Schema\Nodes $parent
+     * @param Nodes $parent
      * @return BaseNode $this
      */
     protected function setParent(Nodes $parent)
@@ -66,7 +70,7 @@ abstract class BaseNode implements \IteratorAggregate
      * Retourne le schéma dont fait partie ce noeud ou null si
      * le noeud n'a pas encore été ajouté à un schéma.
      *
-     * @return \Fooltext\Schema
+     * @return Schema
      */
     public function getSchema()
     {
@@ -76,9 +80,8 @@ abstract class BaseNode implements \IteratorAggregate
     /**
      * Retourne un tableau contenant toutes les données du noeud.
      *
-     * Pour un objet {\Fooltext\Schema\Node}, la méthode retourne les propriétés
-     * du noeud. Pour un objet {\Fooltext\Schema\Nodes} elle retourne la liste
-     * des noeuds fils.
+     * Pour un objet {@link Node}, la méthode retourne les propriétés du noeud.
+     * Pour un objet {@link Nodes} elle retourne la liste des noeuds fils.
      *
      * @return array
      */
@@ -88,39 +91,40 @@ abstract class BaseNode implements \IteratorAggregate
     }
 
     /**
-     * Implémente l'interface {@link \IteratorAggregate}.
+     * Implémente l'interface {@link IteratorAggregate}.
      *
      * Permet d'itérer sur les propriétés d'un noeud avec une boucle foreach.
      *
-     * Pour un objet {\Fooltext\Schema\Node}, la boucle itère sur les propriétés
-     * du noeud. Pour un objet {\Fooltext\Schema\Nodes} la boucle permet de parcourir
-     * tous les noeuds fils.
+     * Pour un objet {@link Node}, la boucle itère sur les propriétés du noeud.
+     * Pour un objet {@link Nodes} la boucle permet de parcourir tous les noeuds fils.
      *
-     * @return \ArrayIterator
+     * @return ArrayIterator
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->data);
+        return new ArrayIterator($this->data);
     }
 
     /**
-     * Méthode utilitaire utilisée par {@link \Fooltext\Schema\Schema::toXml()}.
+     * Méthode utilisée par {@link Schema::toXml()} pour sérialiser un schéma en XML.
      *
-     * Ajoute les propriétés du noeud dans le XMLWriter passé en paramètre.
+     * Ajoute les propriétés du noeud dans l'objet {@link XMLWriter} passé en paramètre.
      *
-     * @param \XMLWriter $xml
+     * @param XMLWriter $xml
      */
-    protected abstract function _toXml(\XMLWriter $xml);
+    protected abstract function _toXml(XMLWriter $xml);
 
     /**
-     * Méthode utilitaire utilisée par {@link \Fooltext\Schema\Schema::toJson()}.
+     * Méthode utilisée par {@link Schema::toJson()} pour sérialiser un schéma en JSON.
      *
      * Sérialise le noeud au format JSON.
      *
      * La méthode ne générère que les propriétés du noeud. La méthode appelante doit
      * générer les accolades ouvrantes et fermantes.
      *
-     * @param \XMLWriter $xml
+     * @param int $indent indentation à générer.
+     * @param string $currentIndent indentation en cours.
+     * @param string $colon chaine à utiliser pour générer le signe ":".
      */
-    protected abstract function _toJson($indent = false, $currentIndent = '', $colon = ':');
+    protected abstract function _toJson($indent = 0, $currentIndent = '', $colon = ':');
 }
