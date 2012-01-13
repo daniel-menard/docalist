@@ -47,7 +47,6 @@ abstract class Node extends BaseNode
      *
      * @var array un tableau de la forme "nom de la propriété" => "classe utilisée".
      */
-
     protected static $nodes = array();
 
     /**
