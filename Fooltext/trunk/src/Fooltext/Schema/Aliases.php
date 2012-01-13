@@ -17,7 +17,10 @@ namespace Fooltext\Schema;
  */
 class Aliases extends Nodes
 {
-    protected static $defaultProperties = array
+    protected static $class = 'Fooltext\\Schema\\Alias';
+
+/*
+    protected static $knownProperties = array
     (
         '_lastid' => null,
     );
@@ -33,4 +36,5 @@ class Aliases extends Nodes
     (
         'image' => 'key--arrow.png',
     );
+*/
 }
