@@ -11,6 +11,7 @@
  * @version     SVN: $Id$
  */
 namespace Fooltext\Schema;
+
 use Fooltext\Schema\Exception\NotFound;
 
 /**
@@ -19,8 +20,8 @@ use Fooltext\Schema\Exception\NotFound;
  * Seul des objets Node peuvent être stockés dans cette collection.
  * Chaque objet est indexé à la fois par son nom et par son ID.
  *
- * La collection se charge d'attribuer un ID aux objets qui son ajoutés et
- * stocke le dernier ID utilisé.
+ * La collection se charge d'attribuer un ID aux objets qui sont
+ * ajoutés et stocke le dernier ID utilisé.
  *
  * @package     Fooltext
  * @subpackage  Schema
@@ -59,9 +60,8 @@ abstract class Nodes extends BaseNode
     /**
      * Construit une nouvelle collection de noeuds.
      *
-     * @param array $data un tableau d'objets {@link \Fooltext\Schema\Node}
-     * (ou de tableaux contenant les propriétés des objets Node) à ajouter
-     * à la collection.
+     * @param array $data un tableau d'objets {@link Node} (ou de tableaux
+     * contenant les propriétés des objets Node) à ajouter à la collection.
      */
     public function __construct(array $data = array())
     {
@@ -82,9 +82,9 @@ abstract class Nodes extends BaseNode
      * Un identifiant unique (propriété _id) sera attribué au noeud si celui-ci
      * n'en a pas encore.
      *
-     * @return \Fooltext\Schema\Nodes $this
+     * @return Nodes $this
      *
-     * @throws Exception Si le noeud n'a pas le bon type (cf {@link Nodes::$class},
+     * @throws Exception Si le noeud n'a pas le bon type (cf {@link Nodes::$class}),
      * n'a pas de nom ou si un noeud portant ce nom figure déjà dans la collection.
      */
     public function add($child)
@@ -169,7 +169,7 @@ abstract class Nodes extends BaseNode
      *
      * @param string|int $name le nom ou l'ID du noeud recherché.
      *
-     * @return \Fooltext\Schema\Nodes $this
+     * @return Nodes $this
      *
      * @throws NotFound Si le noeud indiqué n'existe pas.
      */
@@ -202,7 +202,7 @@ abstract class Nodes extends BaseNode
         }
     }
 
-    protected function _toJson($indent = false, $currentIndent = '', $colon = ':')
+    protected function _toJson($indent = 0, $currentIndent = '', $colon = ':')
     {
         $h = '';
         foreach($this->data as $name => $child)
