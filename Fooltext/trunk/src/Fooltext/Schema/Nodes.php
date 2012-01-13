@@ -20,7 +20,7 @@ use Fooltext\Schema\Exception\NotFound;
  * Chaque objet est indexé à la fois par son nom et par son ID.
  *
  * La collection se charge d'attribuer un ID aux objets qui son ajoutés et
- * stocke le dernier ID utiisé.
+ * stocke le dernier ID utilisé.
  *
  * @package     Fooltext
  * @subpackage  Schema
@@ -30,7 +30,8 @@ abstract class Nodes extends BaseNode
     /**
      * Type des noeuds que contient cette collection.
      *
-     * Tous les noeuds ajoutés à la collection doivent descendre de la classe indiquée.
+     * Tous les noeuds ajoutés à la collection doivent descendre de la
+     * classe indiquée (cf {@link add()}).
      *
      * @var string
      */
@@ -55,6 +56,13 @@ abstract class Nodes extends BaseNode
      */
     protected $id = array();
 
+    /**
+     * Construit une nouvelle collection de noeuds.
+     *
+     * @param array $data un tableau d'objets {@link \Fooltext\Schema\Node}
+     * (ou de tableaux contenant les propriétés des objets Node) à ajouter
+     * à la collection.
+     */
     public function __construct(array $data = array())
     {
         foreach ($data as $name => $child)
@@ -66,20 +74,28 @@ abstract class Nodes extends BaseNode
     /**
      * Ajoute un noeud dans la collection.
      *
-     * @param Node|array $child le noeud fils à ajouter
+     * @param Node|array $child le noeud fils à ajouter, soit sous la forme d'un
+     * objet {@link Node}, soit sous la forme d'un tableau de propriétés qui sera
+     * utilisé pour créer un nouvel objet {@link Node}.
+     *
+     * Le noeud à ajouter doit obligatoirement avoir un nom (propriété name).
+     * Un identifiant unique (propriété _id) sera attribué au noeud si celui-ci
+     * n'en a pas encore.
      *
      * @return \Fooltext\Schema\Nodes $this
      *
-     * @throws Exception Si le noeud n'a pas de nom ou si un noeud portant ce nom figure
-     * déjà dans la collection.
+     * @throws Exception Si le noeud n'a pas le bon type (cf {@link Nodes::$class},
+     * n'a pas de nom ou si un noeud portant ce nom figure déjà dans la collection.
      */
     public function add($child)
     {
-        // Valide
+        // Si c'est un tableau, crée un nouveau Node
         if (is_array($child))
         {
             $child = new static::$class($child);
         }
+
+        // Sinon, vérifie que c'est un objet Node du type indiqué
         elseif (! $child instanceof static::$class)
         {
             throw new \InvalidArgumentException("Type incorrect : $name");
@@ -92,15 +108,16 @@ abstract class Nodes extends BaseNode
             throw new \Exception('Le noeud à ajouter doit avoir un nom');
         }
 
-        // Attribue un id au noeud
-        if (is_null($child->_id) || $child->_id === '')
-        {
-            $child->_id = $this->nextid++;
-        }
-
+        // Vérifie qu'il n'existe pas déjà un noeud avec ce nom
         if (isset($this->data[$name]))
         {
             throw new \Exception("Il existe déjà un noeud avec le nom $name");
+        }
+
+        // Attribue un ID au noeud si nécessaire
+        if (is_null($child->_id) || $child->_id === '')
+        {
+            $child->_id = $this->nextid++;
         }
 
         // Ajoute le noeud
@@ -112,9 +129,9 @@ abstract class Nodes extends BaseNode
     }
 
     /**
-     * Indique si la collection contient un noeud ayant le nom ou l'id indiqué.
+     * Indique si la collection contient un noeud ayant le nom ou l'ID indiqué.
      *
-     * @param string $name
+     * @param string|int $name le nom ou l'ID du noeud recherché.
      * @return boolean
      */
     public function has($name)
@@ -123,11 +140,21 @@ abstract class Nodes extends BaseNode
     }
 
     /**
-     * Retourne le noeud de la collection ayant le nom ou l'id indiqué.
+     * Indique si la collection est vide.
+     *
+     * @return bool
+     */
+    public function isEmpty()
+    {
+        return empty($this->data);
+    }
+
+    /**
+     * Retourne le noeud de la collection ayant le nom ou l'ID indiqué.
      *
      * Génère une exception si le noeud indiqué n'existe pas.
      *
-     * @param string|int $name
+     * @param string|int $name le nom ou l'ID du noeud recherché.
      * @throws NotFound
      */
     public function get($name)
@@ -138,23 +165,13 @@ abstract class Nodes extends BaseNode
     }
 
     /**
-     * Retourne un tableau contenant tous les noeuds présents dans la collection.
+     * Supprime le noeud ayant le nom ou l'ID indiqué.
      *
-     * @return array
-     */
-    public function getAll()
-    {
-        return $this->data;
-    }
-
-    /**
-     * Supprime le noeud ayant le nom ou l'id indiqué.
+     * @param string|int $name le nom ou l'ID du noeud recherché.
      *
-     * Génère une exception si le noeud indiqué n'existe pas.
-     *
-     * @param string[int $name
-     * @throws NotFound
      * @return \Fooltext\Schema\Nodes $this
+     *
+     * @throws NotFound Si le noeud indiqué n'existe pas.
      */
     public function delete($name)
     {
@@ -175,38 +192,6 @@ abstract class Nodes extends BaseNode
         throw new NotFound("Le noeud $name n'existe pas.");
     }
 
-
-
-    /**
-     * Convertit la collection de noeuds en tableau.
-     *
-     * @return array
-     */
-//     public function toArray()
-//     {
-//         $array = parent::toArray();
-//         if (isset($this->children))
-//         {
-//             $children = array();
-//             foreach($this->children as $child)
-//             {
-//                 $children[] = $child->toArray();
-//             }
-//             $array['children'] = $children;
-//         }
-
-//         return $array;
-//     }
-
-
-    /**
-     * Méthode utilitaire utilisée par {@link \Fooltext\Schema}. Ajoute les propriétés
-     * et les fils du noeud dans le XMLWriter passé en paramètre.
-     *
-     * Le tag englobant doit avoir été généré par l'appellant.
-     *
-     * @param \XMLWriter $xml
-     */
     protected function _toXml(\XMLWriter $xml)
     {
         foreach($this->data as $child)
@@ -222,7 +207,6 @@ abstract class Nodes extends BaseNode
         $h = '';
         foreach($this->data as $name => $child)
         {
-//            $h .= $currentIndent . json_encode($name) . $colon;
             $h .= $currentIndent . '{';
             $h .= $child->_toJson($indent, $currentIndent . str_repeat(' ', $indent), $colon);
             $h .= $currentIndent. '},';
@@ -234,10 +218,5 @@ abstract class Nodes extends BaseNode
     public function getNextId()
     {
         return $this->nextid;
-    }
-
-    public function isEmpty()
-    {
-        return empty($this->data);
     }
 }
