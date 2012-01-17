@@ -132,6 +132,7 @@ class SchemaConverter
                 if (count($all) > 1)
                 {
                    $index['fields'] = $all;
+                   unset($index['spelling']);
                    if (isset($collection['aliases'][$index['name']]))
                    {
                        $index['name'] .= '2';
