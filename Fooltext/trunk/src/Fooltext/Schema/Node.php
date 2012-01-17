@@ -81,17 +81,21 @@ abstract class Node extends BaseNode
         // On ajoute ensuite toutes les collections définies pour ce type de noeud
         foreach (static::$nodes as $name => $class)
         {
-            if (isset($data[$name]))
+            if (array_key_exists($name, $data))
             {
                 $nodes = $data[$name];
                 unset($data[$name]);
-                if (is_array($nodes))
+                if (is_null($nodes))
+                {
+                    $nodes = new $class();
+                }
+                elseif (is_null($nodes) || is_array($nodes))
                 {
                     $nodes = new $class($nodes);
                 }
                 elseif (! $nodes instanceof $class)
                 {
-                    throw new \InvalidArgumentException("type incorrect : $name");
+                    throw new \Exception("type incorrect : $name");
                 }
                 $this->data[$name] = $nodes;
             }
