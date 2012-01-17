@@ -19,8 +19,7 @@ use Fooltext\Indexing\AnalyzerInterface;
  *
  * Pour utiliser cet analyseur, vous devez au préalable indexer le texte
  * au mot ou à la phrase (i.e. votre chaine d'analyse doit contenir un
- * analyseur tel que {@link \Fooltext\Indexing\Words} ou
- * {@link \Fooltext\Indexing\Phrases}.
+ * analyseur tel que {@link Words} ou {@link Phrases}.
  */
 class Spellings implements AnalyzerInterface
 {

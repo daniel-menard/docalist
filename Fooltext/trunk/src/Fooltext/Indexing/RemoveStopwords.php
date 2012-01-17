@@ -15,8 +15,11 @@ namespace Fooltext\Indexing;
 /**
  * Supprime les mots vides présents dans les termes ou dans les postings.
  *
- * Remarque : RemoveStopwords doit être exécuté avant Stemming.
- *
+ * Remarques :
+ * - les mots-vides sont stockés en minuscules non accentuées. Pour utiliser
+ *   RemoveStopwords, vous devez donc utiliser au préalable un tokenizer tel
+ *   que {@link Lowercase} ou {@link StripTags}.
+ * - RemoveStopwords doit être exécuté avant Stemming.
  */
 class RemoveStopwords implements AnalyzerInterface
 {

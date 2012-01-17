@@ -16,6 +16,10 @@ use Fooltext\Indexing\AnalyzerInterface;
 
 /**
  * Convertit les caractères en minuscules non accentuées.
+ *
+ * Cet analyseur est en général l'un des premiers utilisés dans une chaine
+ * d'analyse afin que la recherche ne soit pas sensible à la casse des caractères
+ * ou aux accents.
  */
 class Lowercase implements AnalyzerInterface
 {

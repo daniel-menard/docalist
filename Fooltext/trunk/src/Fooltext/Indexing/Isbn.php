@@ -13,12 +13,22 @@
 namespace Fooltext\Indexing;
 
 /**
- * Indexe un ISBN. Gère les isbn à 10 et 13 chiffres
- * - un isb13 est indexé tel quel :
+ * Indexe un ISBN.
+ *
+ * Cet analyseur génère un mot-clé pour chacun des ISBN présents dans le champ indexé.
+ *
+ * Il gère à la fois les ISBN à 10 chiffres et les ISBN à 13 chiffres
+ * - un isbn13 est indexé tel quel :
  *   "978-2-1234-5680-3" -> keywords='9872123456803'
  * - un isbn10 et indexé comme isbn10 ET comme isbn13 :
  * 	"2-1234-5680-2" -> keywords='2123456802', '9872123456803'
  *
+ * Si l'ISBN n'est pas correct (somme de contrôle incorrecte), l'analyseur ajoute
+ * également le mot-clé spécial "__bad", ce qui permet de détecter les ISBN incorrects
+ * au sein d'un corpus via une simple requête de la forme ISBN:__bad.
+ *
+ * Cet analyseur peut être utilisé tout seul : il n'y a pas besoin d'appliquer au
+ * préalable un tokenizer tel que {@link Lowercase}.
  */
 class Isbn implements AnalyzerInterface
 {
@@ -36,7 +46,6 @@ class Isbn implements AnalyzerInterface
                     // Isbn 10 invalide, on indexe à "bad"
                     if (! $this->isValidIsbn10($isbn))
                     {
-                        echo "ISBN 10 invalide : $isbn\n";
                         $isbn = self::BAD;
                     }
 
@@ -45,7 +54,6 @@ class Isbn implements AnalyzerInterface
                     {
                         // Convertit l'isbn 10 en isbn 13
                         $isbn13 = $this->isbn13($isbn);
-                        echo "ISBN 10 valide : $isbn = $isbn13\n";
                         $isbn = array($isbn, $isbn13);
                     }
 
@@ -55,19 +63,13 @@ class Isbn implements AnalyzerInterface
                     // Isbn 13 invalide, on indexe à "bad"
                     if (! $this->isValidIsbn13($isbn))
                     {
-                        echo "ISBN 13 invalide : $isbn\n";
                         $isbn = self::BAD;
                     }
 
-                    // Isbn 13 valide, on l'indexe
-                    else
-                    {
-                        echo "ISBN 13 valide : $isbn\n";
-                    }
+                    // Isbn 13 valide, on l'indexe tel quel
                     break;
 
                 default:
-                    echo "autre chose qu'un ISBN : $isbn, len=", strlen($isbn), "\n";
                     $isbn = self::BAD;
             }
             $data->keywords[] = $isbn;

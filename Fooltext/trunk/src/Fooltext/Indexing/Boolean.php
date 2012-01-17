@@ -12,6 +12,14 @@
  */
 namespace Fooltext\Indexing;
 
+/**
+ * Indexe un champ booléen.
+ *
+ * Génère le mot-clé 'true' ou le mot-clé 'false' selon la valeur du champ.
+ *
+ * Il n'y a pas besoin d'appliquer au préalable un tokenizer ({@link Lowercase}
+ * ou {@link StripTags}) pour pouvoir utiliser cet analyseur.
+ */
 class Boolean implements AnalyzerInterface
 {
     /**
