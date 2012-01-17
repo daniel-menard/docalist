@@ -24,9 +24,8 @@ use Fooltext\Indexing\AnalyzerInterface;
  * Le plus souvent, on souhaite que la table contienne les entrées sous leur
  * forme riche (majuscules et minuscules, accents, etc.) Dans ce cas, cet
  * analyseur doit figurer en tout début de chaine d'analyse, avant d'avoir
- * appliqué un analyseur tel que {@link \Fooltext\Indexing\Lowercase}
- * ou {@link \Fooltext\Indexing\StripTags} qui convertissent les caractères en
- * minuscules non accentuées.
+ * appliqué un analyseur tel que {@link Lowercase} ou {@link StripTags} qui
+ * convertissent les caractères en minuscules non accentuées.
  */
 class Lookup implements AnalyzerInterface
 {

@@ -15,10 +15,14 @@ namespace Fooltext\Indexing;
 /**
  * Compte le nombre d'articles présents dans le champ.
  *
- * Pour un champ vide, ajoute le mot-clé "__empty"
- * Pour un champ scalaire, ajoute le mot-clé "__has1"
- * Pour un champ multivalué, ajoute un mot-clé de la forme "__hasX" ou x représente le nombre
- * d'articles présents dans le champ.
+ * - Pour un champ vide, ajoute le mot-clé "__empty"
+ * - Pour un champ scalaire, ajoute le mot-clé "__has1"
+ * - Pour un champ multivalué, ajoute un mot-clé de la forme "__hasX"
+ *   ou x représente le nombre d'articles présents dans le champ (par
+ *   exemple "__has2" si le champ contient deux articles.)
+ *
+ * Cet analyseur peut être utilisé tout seul : il n'y a pas besoin d'appliquer au
+ * préalable un tokenizer tel que Lowercase.
  */
 class Countable implements AnalyzerInterface
 {

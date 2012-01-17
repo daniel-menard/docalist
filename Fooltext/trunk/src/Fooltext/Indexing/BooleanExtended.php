@@ -12,6 +12,16 @@
  */
 namespace Fooltext\Indexing;
 
+/**
+ * Indexation étendue d'un champ booléen.
+ *
+ * Cet analyseur fonctionne comme l'analyseur de base {@link Boolean} mais génère
+ * les mots-clés 'true', 'on', '1' et 'vrai' si le champ est à true et les mots-clés
+ * 'false', 'off', '0', 'faux' dans le cas contraire.
+ *
+ * Cet analyseur peut être utilisé tout seul : il n'y a pas besoin d'appliquer au
+ * préalable un tokenizer tel que {@link Lowercase}.
+ */
 class BooleanExtended extends Boolean
 {
     /**

@@ -12,6 +12,18 @@
  */
 namespace Fooltext\Indexing;
 
+/**
+ * Indexe un champ date contenant une date stockée au format
+ * "année mois jour" (AAAAMMJJ).
+ *
+ * Cet analyseur ajoute les termes suivants :
+ * - le numéro de jour,
+ * - le nom du mois (en français, en anglais et sous forme abbrégée),
+ * - l'année.
+ *
+ * Cet analyseur peut être utilisé tout seul : il n'y a pas besoin d'appliquer au
+ * préalable un tokenizer tel que {@link Lowercase}.
+ */
 class DateYMD implements AnalyzerInterface
 {
     /**

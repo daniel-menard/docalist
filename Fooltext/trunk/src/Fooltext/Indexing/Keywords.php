@@ -21,7 +21,8 @@ namespace Fooltext\Indexing;
  * Par exemple si le tableau de termes contient array('document', 'papier'),
  * l'analyseur va créer le mot-clé '_document_papier_'.
  *
- * Pour utiliser cet analyseur, vous devez au préalable indexer au mot ou à la phrase.
+ * Pour utiliser cet analyseur, vous devez au préalable indexer au mot ou à la
+ * phrase (analyseurs {@link Words} ou {@link Phrases}).
  */
 class Keywords implements AnalyzerInterface
 {

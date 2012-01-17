@@ -12,6 +12,14 @@
  */
 namespace Fooltext\Indexing;
 
+/**
+ * Indexe un entier.
+ *
+ * Cet analyseur ajoute simplement un terme pour chacun des entiers présents dans le champ.
+ *
+ * Cet analyseur peut être utilisé tout seul : il n'y a pas besoin d'appliquer au
+ * préalable un tokenizer tel que {@link Lowercase}.
+ */
 class Integer implements AnalyzerInterface
 {
     public function analyze(AnalyzerData $data)
