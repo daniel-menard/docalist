@@ -125,8 +125,48 @@ class Schema extends Node
             throw new \Exception('Paramètre incorrect');
         }
 
+        // Teste la version du schéma et convertit le DOM en tableau de données en consquence
+        switch($version = self::getXmlVersion($dom))
+        {
+            case 1: // Version 1, le schéma doit être converti
+                $data = SchemaConverter::fromVersion1($dom->documentElement);
+                break;
+
+            case 2: // Version 2, ok
+                $data = self::domToArray($dom->documentElement);
+                break;
+
+            default: // Version inconnue
+                throw new \Exception("Le code xml de ce schéma n'est pas reconnu (version $version)");
+        }
+
         // Crée le schéma
-        return new self(self::domToArray($dom->documentElement));
+        return new self($data);
+    }
+
+    /**
+     * Détermine la version d'un schéma XML.
+     *
+     * Les anciens formats ont la version 1, les formats actuels ont
+     * (pour le moment) la version 2.
+     *
+     * La méthode retourne le contenu du noeud /version ou 1 si ce noeud
+     * ne figure pas dans le schéma.
+     *
+     * @param DOMDocument $xml le schéma xml à examiner.
+     *
+     * @return int
+     */
+    protected static function getXmlVersion(DOMDocument $xml)
+    {
+        $nodes = $xml->documentElement->getElementsByTagName('version');
+
+        if ($nodes->length === 0)
+        {
+            return 1;
+        }
+
+        return (int) $nodes->item(0)->nodeValue;
     }
 
     /**
