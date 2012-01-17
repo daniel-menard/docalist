@@ -35,5 +35,8 @@ class Alias extends Node
 
         // Description de l'alias
         'description' => '',
+
+        // Liste des champs présents dans l'alias
+        'fields' => array(),
     );
 }
