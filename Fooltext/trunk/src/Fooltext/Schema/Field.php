@@ -45,7 +45,7 @@ class Field extends Node
     	'widget' => 'textbox',
     	'datasource' => '',
 
-    	'analyzer' => null,
+    	'analyzer' => array(),
 
     	'weight' => 1,
     );
