@@ -33,6 +33,8 @@ class Field extends Node
         // Type du champ
         'type' => 'text',
 
+        'repeatable' => false,
+
         // Traduction de la propriété type en entier
         '_type' => null,
 
