@@ -26,7 +26,7 @@ class Document extends \ArrayObject implements DocumentInterface
      * cas, génère un warning "undefined index".
      * Pour éviter cela, on surcharge offsetGets et on teste si le champ
      * existe ou non.
-     * Coupe de chance : offsetGet est appellée quand on utilise la syntaxe
+     * Coup de chance : offsetGet est appellée quand on utilise la syntaxe
      * $document['champ'] mais également quand on utilise la syntaxe
      * $document->champ.
      */
