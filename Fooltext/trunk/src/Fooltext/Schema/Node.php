@@ -97,6 +97,7 @@ abstract class Node extends BaseNode
                 {
                     throw new \Exception("type incorrect : $name");
                 }
+                $nodes->setParent($this);
                 $this->data[$name] = $nodes;
             }
             else
