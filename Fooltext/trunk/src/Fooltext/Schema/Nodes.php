@@ -65,7 +65,7 @@ abstract class Nodes extends BaseNode
      */
     public function __construct(array $data = array())
     {
-        foreach ($data as $name => $child)
+        foreach ($data as $child)
         {
             $this->add($child);
         }
@@ -102,7 +102,7 @@ abstract class Nodes extends BaseNode
         }
 
         // Vérifie que le noeud a un nom
-        $name = $child->name;
+        $name = strtolower($child->name);
         if (empty($name))
         {
             throw new \Exception('Le noeud à ajouter doit avoir un nom');
@@ -136,6 +136,7 @@ abstract class Nodes extends BaseNode
      */
     public function has($name)
     {
+        $name = strtolower($name);
         return isset($this->data[$name]) || isset($this->id[$name]);
     }
 
@@ -155,10 +156,12 @@ abstract class Nodes extends BaseNode
      * Génère une exception si le noeud indiqué n'existe pas.
      *
      * @param string|int $name le nom ou l'ID du noeud recherché.
+     * @return Node
      * @throws NotFound
      */
     public function get($name)
     {
+        $name = strtolower($name);
         if (isset($this->data[$name])) return $this->data[$name];
         if (isset($this->id[$name])) return $this->data[$this->id[$name]];
         throw new NotFound("Le noeud $name n'existe pas.");
@@ -175,6 +178,7 @@ abstract class Nodes extends BaseNode
      */
     public function delete($name)
     {
+        $name = strtolower($name);
         if (isset($this->data['fields'][$name]))
         {
             unset($this->id[$this->data['fields'][$name]->_id]);
@@ -205,7 +209,7 @@ abstract class Nodes extends BaseNode
     protected function _toJson($indent = 0, $currentIndent = '', $colon = ':')
     {
         $h = '';
-        foreach($this->data as $name => $child)
+        foreach($this->data as $child)
         {
             $h .= $currentIndent . '{';
             $h .= $child->_toJson($indent, $currentIndent . str_repeat(' ', $indent), $colon);
@@ -218,5 +222,56 @@ abstract class Nodes extends BaseNode
     public function getNextId()
     {
         return $this->nextid;
+    }
+
+    /**
+     * Retourne le noeud de la collection ayant le nom ou l'ID indiqué.
+     *
+     * Génère une exception si le noeud indiqué n'existe pas.
+     *
+     * Cette méthode fait la même chose que {@link get()} mais permet
+     * d'employer la syntaxe $nodes->child.
+     *
+     * @param string|int $name le nom ou l'ID du noeud recherché.
+     * @throws NotFound
+     */
+    public function __get($name)
+    {
+        return $this->get($name);
+    }
+
+    // __set n'est pas disponible :
+    // si on fait $fields->autphys = new Field(), il y a une confusion
+    // entre le nom indiqué pour la propriété et le nom qui figure dans l'objet Field
+
+    /**
+     * Indique si la collection contient un noeud ayant le nom ou l'ID indiqué.
+     *
+     * Cette méthode fait la même chose que {@link has()} mais permet
+     * d'employer la syntaxe isset($nodes->child).
+     *
+     * @param string|int $name le nom ou l'ID du noeud recherché.
+     * @return boolean
+     */
+    public function __isset($name)
+    {
+        return $this->has($name);
+    }
+
+    /**
+     * Supprime le noeud ayant le nom ou l'ID indiqué.
+     *
+     * Cette méthode fait la même chose que {@link delete()} mais permet
+     * d'employer la syntaxe unset($nodes->child).
+     *
+     * @param string|int $name le nom ou l'ID du noeud recherché.
+     *
+     * @return Nodes $this
+     *
+     * @throws NotFound Si le noeud indiqué n'existe pas.
+     */
+    public function __unset($name)
+    {
+        $this->delete($name);
     }
 }
