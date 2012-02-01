@@ -61,7 +61,7 @@ abstract class BaseNode implements IteratorAggregate
      * @param Nodes $parent
      * @return BaseNode $this
      */
-    protected function setParent(Nodes $parent)
+    protected function setParent(BaseNode $parent)
     {
         $this->parent = $parent;
     }
