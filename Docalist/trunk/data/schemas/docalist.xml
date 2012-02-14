@@ -1,0 +1,1131 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<schema>
+    <version>2</version>
+    <label>Format docalist pour la base documentaire</label>
+    <description>Permet de stocker et de gérer des notices bibliographiques décrivant à peu près tout type de document : articles de périodiques, ouvrages, rapports, sites web, revues, etc.</description>
+    <stopwords></stopwords>
+    <creation>2012/02/03 11:23:27</creation>
+    <lastupdate></lastupdate>
+    <document>\Fooltext\Document\Document</document>
+    <docid></docid>
+    <notes>Historique :
+- 03/02/12, DM : création initiale du schéma.</notes>
+    <fields>
+        <item>
+            <name>Ref</name>
+            <type>autonumber</type>
+            <repeatable>false</repeatable>
+            <label>Numéro de référence</label>
+            <description>Numéro unique identifiant la notice au sein de la base de données.</description>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes>Le gestionnaire de base de données attribue automatiquement un numéro de référence aux notices qui n'en n'ont pas encore.</notes>
+            <_id>1</_id>
+        </item>
+        <item>
+            <name>Type</name>
+            <type>text</type>
+            <repeatable>false</repeatable>
+            <label>Type de document</label>
+            <description>Code unique indiquant le type du document catalogué : article, ouvrage, site web, revue...</description>
+            <widget>select</widget>
+            <datasource></datasource>
+            <notes><![CDATA[Le type de document est unique, le champ n'est pas répétable.
+
+Le type indiqué identifie de façon unique la "famille" à laquelle appartient la notice.
+C'est ce type qui détermine le formulaire de saisie à utiliser, le format d'affichage, etc.]]></notes>
+            <_id>8</_id>
+        </item>
+        <item>
+            <name>Genre</name>
+            <type>text</type>
+            <repeatable>true</repeatable>
+            <label>Genre de document</label>
+            <description>Champ multivalué décrivant le genre (la nature) du document auquel on a affaire.</description>
+            <widget>checklist</widget>
+            <datasource></datasource>
+            <notes>Le genre de document est répétable : on décrit la nature du document sous ses différents angles (par exemple : communication à un congrès, dresse un état de l'art, etc.)</notes>
+            <_id>9</_id>
+        </item>
+        <item>
+            <name>Media</name>
+            <type>text</type>
+            <repeatable>true</repeatable>
+            <label>Support du document</label>
+            <description>Décrit le support physique du document (papier, dvd, etc.)</description>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes>Le champ est répétable pour pouvoir gérer les documents multi-supports (par exemple papier et cd).</notes>
+            <_id>10</_id>
+        </item>
+        <item>
+            <name>Author</name>
+            <repeatable>true</repeatable>
+            <label>Auteur(s) du document</label>
+            <description><![CDATA[Liste des personnes physiques auteurs du document.
+
+Ce champ ne contient que des auteurs physiques (c'est-à-dire des noms de personnes). Les auteurs moraux (collectivités auteurs, organismes commanditaires, etc.) sont stockés dans le champ "Organisation".
+
+Le champ Author peut contenir à la fois les auteurs principaux et les auteurs secondaires (contributeurs) : c'est la présence ou non d'une étiquette de rôle qui indique s'il s'agit d'un auteur secondaire (et informe sur la nature de sa contribution).]]></description>
+            <notes>Le champ est structuré en trois zones distinctes (nom, prénom et rôle) pour éviter d'avoir à définir une syntaxe particulière pour la saisie des auteurs. Cela simplifiera la saisie et les contrôles et permet toute liberté, au moment de l'affichage de la notice ou lors de l'export, pour décider comment on souhaite afficher les auteurs.</notes>
+            <_id>11</_id>
+            <fields>
+                <item>
+                    <name>name</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Nom</label>
+                    <description>Nom de la personne.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes><![CDATA[A saisir de préférence en forme "riche" : majuscule initiale puis lettres minuscules accentuées.]]></notes>
+                    <_id>1</_id>
+                </item>
+                <item>
+                    <name>firstname</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Prénom</label>
+                    <description>Prénom(s) de la personne.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>De préférence un prénom complet ou seulement l'initiale du prénom si le prénom complet n'est pas connu.</notes>
+                    <_id>2</_id>
+                </item>
+                <item>
+                    <name>role</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Rôle</label>
+                    <description>Pour un auteur secondaire (un contributeur), étiquette de rôle décrivant la nature de sa contribution (traducteur, auteur de la préface, etc.)</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Par convention, tous les auteurs physiques qui ont une étiquette de rôle sont des auteurs secondaires.
+
+Saisie sur table.</notes>
+                    <_id>3</_id>
+                </item>
+            </fields>
+        </item>
+        <item>
+            <name>Organisation</name>
+            <repeatable>true</repeatable>
+            <label>Organisme(s) auteur(s) du document</label>
+            <description>Liste des auteurs moraux du document : noms d'organismes, collectivités auteurs, organismes commanditaires, etc.
+
+Le champ Organisation peut contenir à la fois des auteurs principaux et les auteurs secondaires (contributeurs) : c'est la présence ou non d'une étiquette de rôle qui indique s'il s'agit d'un auteur secondaire (et informe sur la nature de sa contribution).</description>
+            <notes>Dans le cas d'une thèse, on pourrait également stocker ici l'université de soutenance, avec une étiquette de rôle spécifique.
+
+Le champ est structuré en plusieurs zones distinctes pour éviter d'avoir à définir une syntaxe particulière pour la saisie des noms d'organismes. Cela simplifiera la saisie et les contrôles et permet toute liberté, au moment de l'affichage de la notice ou lors de l'export, pour décider comment on souhaite afficher les auteurs.</notes>
+            <_id>12</_id>
+            <fields>
+                <item>
+                    <name>name</name>
+                    <type>text</type>
+                    <repeatable>true</repeatable>
+                    <label>Nom</label>
+                    <description>Nom de l'organisme</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Le nom est répétable pour pouvoir gérer des subdivisions (par exemple, ministère xxx : direction yyy : service zzz)
+La zone nom contient à la fois le nom et le sigle qui serait saisi à la fin entre parenthèses.
+Exemple : Organisation mondiale de la santé (OMS).</notes>
+                    <_id>1</_id>
+                </item>
+                <item>
+                    <name>city</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Ville</label>
+                    <description>Ville de l'organisme</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes></notes>
+                    <_id>2</_id>
+                </item>
+                <item>
+                    <name>country</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Pays</label>
+                    <description>Pays de l'organisme</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Code iso 3 lettres, saisie sur table.</notes>
+                    <_id>3</_id>
+                </item>
+                <item>
+                    <name>role</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Rôle</label>
+                    <description>Pour un auteur moral secondaire, nature de la contribution de cet auteur au document.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Les étiquettes de rôle sont nécessaires, entres autres pour indiquer les organismes commanditaires, l'université de soutenance, etc.
+
+Saisie sur table à partir d'une liste d'étiquettes prédéfinies.</notes>
+                    <_id>4</_id>
+                </item>
+            </fields>
+        </item>
+        <item>
+            <name>Title</name>
+            <type>text</type>
+            <repeatable>false</repeatable>
+            <label>Titre du document</label>
+            <description>Titre original du document catalogué.</description>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes>On saisit ici le titre qui figure sur le document.
+
+On ne fait pas de distinction entre titre de niveau analytique et titre de niveau monographique (cas de la Bdsp).
+Si le document fait partie d'un ensemble plus large, le titre de l'ensemble ira dans la zone OtherTitle.</notes>
+            <_id>13</_id>
+        </item>
+        <item>
+            <name>OtherTitle</name>
+            <repeatable>true</repeatable>
+            <label>Autres titres</label>
+            <description>Autres titres relatifs au document analysé dans la notice.</description>
+            <notes>Ce champ permet de stocker tous les autres titres relatifs au document catalogué.
+
+Il est utilisable à chaque fois qu'on a plus d'un titre à stocker pour un document : 
+Exemples :
+- Pour un chapitre, titre du livre dont il est extrait ;
+- Pour un article dans un dossier thématique, titre du dossier thématique.
+
+Chaque titre est stockée sous forme structurée :
+- type de titre (champ sur table : titre du dossier, titre du supplément, etc.)
+- titre
+
+Remarque : remplace le champ Bdsp TitEns (titre de l'ensemble).</notes>
+            <_id>14</_id>
+            <fields>
+                <item>
+                    <name>type</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Nature du titre</label>
+                    <description>Type de titre</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Code (champ sur table) indiquant la nature du titre qui figure dans la zone title (titre de l'ensemble, titre du numéro spécial, etc.)</notes>
+                    <_id>1</_id>
+                </item>
+                <item>
+                    <name>title</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Titre</label>
+                    <description>Autre titre du document.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Ajouter un code langue pour savoir dans quelle langue est le titre ? (correcteur orthographique, stemming...)</notes>
+                    <_id>2</_id>
+                </item>
+            </fields>
+        </item>
+        <item>
+            <name>Translation</name>
+            <repeatable>true</repeatable>
+            <label>Traduction du titre</label>
+            <description>Traduction en une ou plusieurs langues, du titre original du document qui figure dans le champ Title.</description>
+            <notes>Cette zone permet de saisir une ou plusieurs traductions pour un titre qui n'est pas dans la langue du centre.
+Chaque titre indique la langue de la traduction et la traduction du titre.
+
+Amalgamer ce champ avec OtherTitle ?
+(type = eng : traduction en anglais du titre original, etc.)
+
+Champ répétable pour pouvoir indiquer plusieurs traductions.</notes>
+            <_id>15</_id>
+            <fields>
+                <item>
+                    <name>language</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Langue</label>
+                    <description>Langue du document qui figure dans la zone title.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Code iso 3 lettres (par exemple FRE pour français).
+Saisie sur table.</notes>
+                    <_id>1</_id>
+                </item>
+                <item>
+                    <name>title</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Titre traduit</label>
+                    <description>Traduction (dans la langue indiquée dans la zone language) du titre original du document qui figure dans le champ Title.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes></notes>
+                    <_id>2</_id>
+                </item>
+            </fields>
+        </item>
+        <item>
+            <name>Date</name>
+            <type>date</type>
+            <repeatable>false</repeatable>
+            <label>Date de publication</label>
+            <description>Date d'édition ou de diffusion du document.</description>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes>Dates au format AAAA/MM/JJ.</notes>
+            <_id>21</_id>
+        </item>
+        <item>
+            <name>Journal</name>
+            <type>text</type>
+            <repeatable>false</repeatable>
+            <label>Titre de périodique</label>
+            <description>Nom du journal (revue, magazine, périodique, etc.) dans lequel a été publié le document.</description>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes>On ne distingue pas les titres abrégés, normalisés, etc.</notes>
+            <_id>17</_id>
+        </item>
+        <item>
+            <name>Issn</name>
+            <type>text</type>
+            <repeatable>false</repeatable>
+            <label>Issn</label>
+            <description>International Standard Serial Number : numéro international identifiant le périodique dont le nom figure dans le champ Journal.</description>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes>Deux groupes de quatre chiffres séparés par un tiret, avec parfois un x à la place du dernier chiffre.</notes>
+            <_id>18</_id>
+        </item>
+        <item>
+            <name>Volume</name>
+            <type>int</type>
+            <repeatable>false</repeatable>
+            <label>Numéro de volume</label>
+            <description>Pour les publications en série, ce champ content le numéro de volume du fascicule.
+Pour les monographies, ce champ contient le numéro de tome du document référencé dans la notice</description>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes>Champ de type entier. Voir si cela pose un problème : certains numéros de volume sont parfois indiqués en chiffres romains et dans ce cas, il faudra les convertir en chiffres arabes.</notes>
+            <_id>19</_id>
+        </item>
+        <item>
+            <name>Issue</name>
+            <type>text</type>
+            <repeatable>false</repeatable>
+            <label>Numéro de fascicule</label>
+            <description>Indique le numéro du fascicule de la revue dans lequel l'article a été publié.</description>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes>Le champ est de type texte (et non pas de type entier) car il y a une très grande variété dans les numéros de fascicule : numéros doubles (18-19), numéros avec des lettres (A25, RR-10), numéros structurés (2012/1), mentions (5 bis), etc.</notes>
+            <_id>20</_id>
+        </item>
+        <item>
+            <name>Language</name>
+            <type>text</type>
+            <repeatable>true</repeatable>
+            <label>Langue du document</label>
+            <description>Ce champ permet d'indiquer la langue (ou les langues) dans laquelle est écrit le document.</description>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes>Saisie sur table, stockage sous forme de code ISO 3 lettres, répétable pour gérer le cas des documents multilingues.</notes>
+            <_id>26</_id>
+        </item>
+        <item>
+            <name>Pagination</name>
+            <type>text</type>
+            <repeatable>true</repeatable>
+            <label>Pagination</label>
+            <description><![CDATA[Pagination du document catalogué.
+
+Pour une monographie, il s'agit du nombre de pages sous la forme "xp." (exemple : 10p.)
+Au niveau analytique (article, extrait, chapitre...) il s'agit de la page de début et de la page de fin sous la forme xx-yy (ou xx seulement si l'article ne fait qu'une seule page).]]></description>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes>Le champ est répétable pour pouvoir gérer :
+- les livres en plusieurs tomes, par exemple pour un mémoire et ses annexes : 100p. ¤ 150p.
+- les paginations discontinues (au niveau analytique), exemple : 10-12 ¤ 15-20
+
+En terme de syntaxe, chaque valeur n'a en fait que trois formes possibles : x, x-y ou xp.</notes>
+            <_id>29</_id>
+        </item>
+        <item>
+            <name>Format</name>
+            <type>text</type>
+            <repeatable>false</repeatable>
+            <label>Format du document</label>
+            <description>Caractéristiques matérielles du document : étiquettes de collation (tabl, ann, fig...), références bibliographiques, etc.</description>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes><![CDATA[Les étiquettes de collation peuvent être dénombrées (par exemple "réf. bibl." ou "12 réf. bibl.").]]></notes>
+            <_id>30</_id>
+        </item>
+        <item>
+            <name>Isbn</name>
+            <type>text</type>
+            <repeatable>true</repeatable>
+            <label>Isbn</label>
+            <description>International Standard Book Number : numéro international permettant d'identifier un livre publié.</description>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes>Numéro de 13 chiffres avec parfois un X à la place du dernier chiffre. Les anciens ISBN avaient 10 chiffres.</notes>
+            <_id>23</_id>
+        </item>
+        <item>
+            <name>Editor</name>
+            <repeatable>true</repeatable>
+            <label>Editeur et lieu d'édition</label>
+            <description>Société ou organisme délégué par l’auteur pour assurer la diffusion et la commercialisation du document.
+Ce champ permet d'indiquer la ville et le pays où la société a son siège et le nom de cette société.</description>
+            <notes>Le champ est répétable pour pouvoir gérer le cas de documents co-édités (plusieurs sociétés d'édition situées ou non dans des lieux ou pays différents).
+
+Le champ Editor et les zones qu'il contient ont exactement la même structure et la même syntaxe que le champ Organisation.</notes>
+            <_id>22</_id>
+            <fields>
+                <item>
+                    <name>name</name>
+                    <type>text</type>
+                    <repeatable>true</repeatable>
+                    <label>Nom de l'éditeur</label>
+                    <description>Nom de l'éditeur, tel qu'il figure sur le document catalogué.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>La zone name est répétable pour pouvoir gérer des subdivisions dans le nom de l'éditeur, comme c'est le cas pour la zone name du champ Organization.
+
+Possibilité de saisir un sigle entre parenthèses à la fin.</notes>
+                    <_id>1</_id>
+                </item>
+                <item>
+                    <name>city</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Ville d'édition</label>
+                    <description>Ville dans laquelle l'éditeur a son siège social.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes></notes>
+                    <_id>2</_id>
+                </item>
+                <item>
+                    <name>country</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Pays d'édition</label>
+                    <description>Pays où est implanté le siège social de l'éditeur.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>En format BDSP, c'est une zone à part susceptible d'être utilisée pour autre chose que des livres. Est-ce utile ?</notes>
+                    <_id>3</_id>
+                </item>
+            </fields>
+        </item>
+        <item>
+            <name>Edition</name>
+            <repeatable>true</repeatable>
+            <label>Mentions d'éditions et autres numéros du document</label>
+            <description><![CDATA[Ce champ répétable permet de cataloguer les mentions d'édition diverses ("2nde édition revue et augmentée", "supplément", "édition 2012", etc.) et les différents numéros qui figurent sur le document et qui ne font pas l'objet d'un champ spécifique dans le format (numéro de rapport, numéro de supplément ou de hors série).]]></description>
+            <notes><![CDATA[Les mentions et les numéro sont gérés de façon structurée sous la forme "type de mention ou de numéro" : "valeur".
+Par exemple, pour indiquer "3ème hors série", on saisirait :
+- type de mention : "hors série"
+- valeur : "3"
+
+Ce champ pourrait également servir à cataloguer, pour un texte officiel, les dates de début et de fin de validité de ce texte (Ascodocpsy fait cela).]]></notes>
+            <_id>24</_id>
+            <fields>
+                <item>
+                    <name>type</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Type</label>
+                    <description>Type de mention.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes><![CDATA[Saisie sur table contenant la liste des différentes mentions possibles (supplément, nouvelle édition, édition revue et corrigée, numéro de rapport, numéro de texte officiel, etc.)
+
+Chaque mention peut contenir un code indiquant ou la valeur doit être placée lorsque la notice est affichée.
+Par exemple, on indiquerait "%value" pour injecter la valeur telle qu'elle a été saisie et "%ordinal" pour injecter l'adjectif ordinal correspondant. Si la mention ne contient aucun code, on affiche simplement la mention, le signe deux-points et la valeur.
+
+Exemples :
+- rapport n°%value -> rapport n°2
+- %ordinal édition revue et corrigée -> 2nde édition revue et corrigée
+- fin de validité -> fin de validité : 12/12/2012]]></notes>
+                    <_id>1</_id>
+                </item>
+                <item>
+                    <name>value</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Valeur</label>
+                    <description>Valeur associée à la mention d'édition (numéro du rapport, numéro de l'édition, date de validité, etc.)</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes></notes>
+                    <_id>2</_id>
+                </item>
+            </fields>
+        </item>
+        <item>
+            <name>Collection</name>
+            <repeatable>true</repeatable>
+            <label>Collection et sous-collection, numéro au sein de la collection</label>
+            <description>Permet d'indiquer la collection et le numéro au sein de cette collection du document catalogué.</description>
+            <notes>Champ répétable pour pouvoir gérer les collections, les sous-collections, les sous-sous-collections, etc.
+Champ structuré : nom de la collection, numéro dans la collection</notes>
+            <_id>25</_id>
+            <fields>
+                <item>
+                    <name>name</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Nom</label>
+                    <description>Nom de la collection (ou de la sous-collection).</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes></notes>
+                    <_id>1</_id>
+                </item>
+                <item>
+                    <name>number</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Numéro dans la collection</label>
+                    <description>Numéro au sein de la collection (ou de la sous-collection) indiquée dans la zone name.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes></notes>
+                    <_id>2</_id>
+                </item>
+            </fields>
+        </item>
+        <item>
+            <name>Event</name>
+            <repeatable>false</repeatable>
+            <label>Informations sur l'évènement</label>
+            <description>Lorsque le document catalogué est relatif à un évènement (congrès, colloque, manifestation, soutenance de thèse, etc.), ce champ permet d'indiquer le titre, la date, le lieu et le numéro de cet évènement.
+</description>
+            <notes>Ce champ est utilisable à chaque fois qu'on souhaite décrire une information de type évènementiel (quoi/quand/où...)
+
+Par exemple, pour des actes de colloques, il permet de stocker les informations relatives au congrès (titre du congrès, date, ville, etc.)
+
+Pour une soutenance de thèse, il pourrait servir à indiquer la date et le lieu de soutenance.
+
+On peut éventuellement en étendre l'utilisation : par exemple pour un document qui retranscrirait l'appel du 18 juin 40 : date, londres, etc.</notes>
+            <_id>16</_id>
+            <fields>
+                <item>
+                    <name>title</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Titre</label>
+                    <description>Titre de l'évènement.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Titre du congrès, nom de la réunion, etc.</notes>
+                    <_id>1</_id>
+                </item>
+                <item>
+                    <name>date</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Date</label>
+                    <description>Date de l'évènement.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes></notes>
+                    <_id>2</_id>
+                </item>
+                <item>
+                    <name>place</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Lieu</label>
+                    <description>Lieu de l'événement (ville et/ou pays).</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Séparer ville et pays (city et country) comme on a fait pour Organisation et Editor ?</notes>
+                    <_id>3</_id>
+                </item>
+                <item>
+                    <name>number</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Numéro</label>
+                    <description>Numéro éventuel associé à l'évènement.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Numéro du congrès, par exemple.</notes>
+                    <_id>4</_id>
+                </item>
+            </fields>
+        </item>
+        <item>
+            <name>Degree</name>
+            <repeatable>false</repeatable>
+            <label>Diplôme</label>
+            <description>Intitulé du diplôme pour les documents donnant lieu à l'attribution d'un titre universitaire ou professionnel.</description>
+            <notes></notes>
+            <_id>28</_id>
+            <fields>
+                <item>
+                    <name>level</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Niveau</label>
+                    <description>Grade universitaire ou niveau auquel donne droit ce diplôme : licence, master, doctorat, etc.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes></notes>
+                    <_id>1</_id>
+                </item>
+                <item>
+                    <name>title</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Titre du diplôme</label>
+                    <description>Intitulé du diplôme ou de la spécialité professionnelle.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Le directeur de thèse ou de mémoire va dans champ Author avec une étiquette de rôle adaptée.</notes>
+                    <_id>2</_id>
+                </item>
+            </fields>
+        </item>
+        <item>
+            <name>Abstract</name>
+            <repeatable>true</repeatable>
+            <label>Résumé</label>
+            <description>Résumé du document et langue du résumé.</description>
+            <notes>Bien que ce soit peut utilisé, ce champ est répétable pour pouvoir saisir plusieurs résumés. Par exemple, en format Bdsp, on a la possibilité d'avoir un résumé en français, un en anglais et un en espagnol.
+
+On indique la langue de chaque résumé (mais peut-être qu'il faut qu'il y ait une langue par défaut), pour pouvoir implémenter des fonctions portant sur la langue : correction orthographique, stemming (lemmatisation), etc.
+
+Le code langue peut également être utile à des fins statistiques (combien de notices ont un résumé en français, etc.)</notes>
+            <_id>32</_id>
+            <fields>
+                <item>
+                    <name>language</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Langue</label>
+                    <description>Langue du résumé</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Code ISO 3 lettres de la langue du résumé indiqué dans la zone content.
+Saisie sur table.</notes>
+                    <_id>1</_id>
+                </item>
+                <item>
+                    <name>content</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Résumé du document</label>
+                    <description>Résumé du document, dans la langue mentionnée dans la zone language.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes></notes>
+                    <_id>2</_id>
+                </item>
+            </fields>
+        </item>
+        <item>
+            <name>Topic</name>
+            <repeatable>true</repeatable>
+            <label>Indexation du document</label>
+            <description>Ce champ contient tous les mots-clés permettant l’indexation du document : mots-clés matières, mots outils, noms propres, description géographique, période historique, candidats descripteurs, etc.</description>
+            <notes>Ce champ remplace a lui seul tous les champs mots-clés qu'on trouve habituellement dans les formats et offre plus de souplesse.
+
+Il est organisé de la façon suivante : type de mots-clés : liste des mots-clés de ce type.
+
+Pour cette raison, le champ Topics est répétable (pour pouvoir saisir des mots-clés de type différents) et la sous-zone terms est elle-même répétable.
+
+Le champ est très souple car on peut ajouter de nouveaux types de mots-clés (par exemple en format Bdsp : mots-clés pascal anglais et français, mots-clés mesh, etc.) sans avoir à créer des champs supplémentaires.</notes>
+            <_id>31</_id>
+            <fields>
+                <item>
+                    <name>type</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Type</label>
+                    <description>Nature des mots-clés indiqués dans la zone terms.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes><![CDATA[Code qui identifie le "vocabulaire" dont sont issus les mots-clés (exemple : tsp4, mesh, period, geo...)
+
+Saisie sur table à partir de la liste des thésaurus définis dans le logiciel.]]></notes>
+                    <_id>1</_id>
+                </item>
+                <item>
+                    <name>terms</name>
+                    <type>text</type>
+                    <repeatable>true</repeatable>
+                    <label>Terms</label>
+                    <description>Liste des mots-clés du type indiqué dans la zone type.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Zone répétable pour pouvoir saisir plusieurs mots-clés du type indiqué.</notes>
+                    <_id>2</_id>
+                </item>
+            </fields>
+        </item>
+        <item>
+            <name>Note</name>
+            <repeatable>true</repeatable>
+            <label>Notes</label>
+            <description>Notes, remarques et informations supplémentaires sur le document.</description>
+            <notes><![CDATA[Champ générique pouvant accueillir tout type de notes (sauf le résumé) :
+- warning, document litigieux
+- info générale destinée au public
+- note interne visible uniquement par les propriétaires de la notice et les administrateurs
+- objectifs pédagogiques
+- public concerné
+- pré-requis
+- modalités d'accès
+- informatiosn de copyright,
+etc.
+
+Champ structuré de la forme type : content.
+
+Le champ est répétable pour pouvoir saisir des notes de type différentes.
+
+Remarque : étendre l'usage du champ. Peut servir par exemple, à stocker le sommaire d'un ouvrage, une rubrique "qu'en dit la presse", une critique, etc.]]></notes>
+            <_id>33</_id>
+            <fields>
+                <item>
+                    <name>type</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Type de note</label>
+                    <description>Code indiquant la nature de la note qui figure dans la zone content.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes><![CDATA[Saisie sur table.
+
+Certains types de notes peuvent être définis comme "privés" et ne seront alors affichés que pour le propriétaire de la notice et les administrateurs.]]></notes>
+                    <_id>1</_id>
+                </item>
+                <item>
+                    <name>content</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Contenu</label>
+                    <description>Contenu de la note</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes></notes>
+                    <_id>2</_id>
+                </item>
+            </fields>
+        </item>
+        <item>
+            <name>Link</name>
+            <repeatable>true</repeatable>
+            <label>Liens internet</label>
+            <description>Ce champ permet de gérer avec un champ unique tous les liens de la notice (url, adresses e-mail, etc.)</description>
+            <notes><![CDATA[Le champ est structuré. Pour chaque lien, on peut indiquer :
+- la nature du lien (version en texte intégral du document, site de l'éditeur, texte des annexes, ...)
+- l'url du lien
+- le libellé qui sera utilisé en affichage
+- la date à laquelle le documentaliste a consulté le site.
+
+On a en outre deux autres zones qui pourraient être utilisées par le vérificateur de liens (lastcheck et checkstatus).
+
+Extension : ce champ permet également de gérer les "pièces jointes" attachées à la notice : document (pdf, word...), images (vignette de couverture, etc.).
+
+Gestion des liens à l'affichage : 
+- le système gère de façon spécifique certains types de lien.
+- par exemple, lorsqu'on affiche le titre du document, on regarde si on a un lien de type "fulltext" et si c'est le cas, on affiche le lien.
+- on regarde de même si on a un lien de type "cover" et si c'est le cas, on affiche en sidebar l'image de couverture.
+- etc.
+- En fin de notice, on afficherait une rubrique "Ressources complémentaires" qui listerait tous les liens qui n'ont pas été pris en compte au préalable.]]></notes>
+            <_id>7</_id>
+            <fields>
+                <item>
+                    <name>type</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Type d'url</label>
+                    <description>Indique la nature de l'url référencée dans la zone url.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Saisie sur table.</notes>
+                    <_id>6</_id>
+                </item>
+                <item>
+                    <name>url</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Adresse du lien</label>
+                    <description>Il doit s'agit d'une url complète incluant le protocole (http://, mailto://, ftp://, etc).</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes></notes>
+                    <_id>1</_id>
+                </item>
+                <item>
+                    <name>label</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Libellé du lien</label>
+                    <description>Il s'agit du libellé qui sera affiché lorsqu'on consulte la notice.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Si l'utilisateur ne saisit pas de libellé, c'est l'url qui est utilisée comme libellé (ou alors, le libellé associé au type, à voir).</notes>
+                    <_id>2</_id>
+                </item>
+                <item>
+                    <name>date</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Accédé le</label>
+                    <description>Zone facultative permettant au documentaliste d'indiquer la date à laquelle il a accédé à la ressource et d'en informer l'utilisateur.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Affichage typique : 
+Formulaire d'inscription disponible à l'adresse : http//form.ulai.re/ (accédé le 03/02/12).</notes>
+                    <_id>3</_id>
+                </item>
+                <item>
+                    <name>lastcheck</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Date de dernière vérification du lien</label>
+                    <description>Zone utilisée par le vérificateur de liens.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes><![CDATA[Vérificateur de liens : date à laquelle le lien a été testé pour la dernière fois.
+Cette zone fonctionne de paire avec la zone checkstatus.
+
+Elle serait indexé pour permettre des recherches par date. L'idéal : sous forme d'attribut pour pouvoir lancer des recherches de la forme lastcheck:2012/01/01..2012/01/31
+Il faut également indexer à "count" pour rechercher les urls qui n'ont jamais été vérifiées (lastcheck=__empty).]]></notes>
+                    <_id>4</_id>
+                </item>
+                <item>
+                    <name>checkstatus</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>Statut obtenu lors de la dernière vérification de ce lien</label>
+                    <description>Zone utilisée par le vérificateur de liens.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Code et message de statut retourné par le serveur lors de la dernière vérification du lien.
+Par convention, si la zone est vide, c'est que l'adresse est OK.
+Dans le cas contraire, la zone contiendrait quelque chose de la forme code:reason (par exemple : 404:not found).
+Lors de l'affichage d'une notice, il faudrait (pour les admins) afficher un warning avec le statut si celui-ci n'est pas vide.
+Ce champ serait simplement indexé à count : 
+checkstatus=* -&gt; toutes les notices dont l'une des urls est en erreur (il faut ensuite balayer la liste des urls pour déterminer laquelle).</notes>
+                    <_id>5</_id>
+                </item>
+            </fields>
+        </item>
+        <item>
+            <name>Doi</name>
+            <type>text</type>
+            <repeatable>false</repeatable>
+            <label>DOI</label>
+            <description>Digital Object Identifier : numéro identifiant de façon unique la ressource électronique décrite dans le document catalogué.</description>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes><![CDATA[Il n'est peut-être pas utile d'avoir un champ à part pour cela (c'est un peu trop spécifique).
+
+On pourrait peut-être cataloguer le DOI :
+- soit dans le champ url : si on le saisit sous la forme "doi:10.1340", un DOI est assez proche d'une URI.
+- soit dans le champ Edition (autres numéros du document) sous la forme type:DOI, value: 10.1340.]]></notes>
+            <_id>34</_id>
+        </item>
+        <item>
+            <name>Relations</name>
+            <repeatable>true</repeatable>
+            <label>Relations</label>
+            <description>Champ générique permettant d'établir des relations entre la notice cataloguée et d'autres notices présentes au sein de la même base de données documentaire.</description>
+            <notes>Champ structuré : pour chaque relation on indique le type de la relation et le numéro de référence de la notice liée.
+
+La majorité des relations sont symétriques. Lors de l'enregistrement d'une notice contenant des relations symétriques, il faudrait que cela crée (ou que cela mette à jour) les relations inverses dans la notice liée.
+
+Exemples de relations :
+- voir aussi
+- nouvelle édition de / ancienne édition de
+- parent (in)
+- devient / fait suite à
+
+Relations dans pubmed :
+- Comment on / Comment in
+- Erratum in / Erratum for
+- Corrected and Republished in / Corrected and Republished from
+- Partial retraction in / Partial retraction of
+- Republished in / Republished from
+- Retraction in / Retraction of
+- Update in / Update of
+- Summary for patients in
+- Original report in
+
+etc.</notes>
+            <_id>35</_id>
+            <fields>
+                <item>
+                    <name>type</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>type</label>
+                    <description>Type de relation</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Saisie sur table.</notes>
+                    <_id>1</_id>
+                </item>
+                <item>
+                    <name>ref</name>
+                    <type>int</type>
+                    <repeatable>false</repeatable>
+                    <label>Référence liée</label>
+                    <description>Numéro de la référence qui est liée à la notice cataloguée par une relation du type indiqué dans la zone type.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Peut-être que la zone ref devrait être répétable pour pouvoir indiquer plusieurs notices d'un même type ?
+(cela évite juste d'avoir à ressaisir le type).</notes>
+                    <_id>2</_id>
+                </item>
+            </fields>
+        </item>
+        <item>
+            <name>Owner</name>
+            <type>text</type>
+            <repeatable>true</repeatable>
+            <label>Propriétaire de la notice</label>
+            <description>Ce champ permet d'enregistrer des informations sur le propriétaire/le producteur de la notice.
+
+Il peut s'agir du sigle du centre de documentation qui a produit la notice et/ou du login ou des initiales de la personne qui l'a saisie.</description>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes>Le champ est répétable pour pouvoir gérer plusieurs valeurs : stockage de l'ident du producteur et du login du documentaliste, cas d'une même notice fournie par plusieurs centres différents, etc.
+
+Pour les notices moissonnées, ce champ pourrait également servir à garder une trace de l'origine.
+
+Ce champ sert également pour la gestion des droits : seul le propriétaire d'une notice peut éditer ou supprimer une notice (hormis les administrateurs).</notes>
+            <_id>2</_id>
+        </item>
+        <item>
+            <name>Creation</name>
+            <repeatable>false</repeatable>
+            <label>Date de création de la notice</label>
+            <description>Ce champ permet de stocker la date à laquelle la notice a été créée et de savoir par qui elle a été créée.</description>
+            <notes>Voir si cela fait double emploi avec le champ owner. Si c'est le cas, Creation deviendrait un simple champ stockant la date.</notes>
+            <_id>3</_id>
+            <fields>
+                <item>
+                    <name>date</name>
+                    <type>date</type>
+                    <repeatable>false</repeatable>
+                    <label>le</label>
+                    <description>Contient la date de création de la notice au format AAAAMMJJ.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes></notes>
+                    <_id>1</_id>
+                </item>
+                <item>
+                    <name>by</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>par</label>
+                    <description>Stocke l'ident du centre qui a créé la notice.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes></notes>
+                    <_id>2</_id>
+                </item>
+            </fields>
+        </item>
+        <item>
+            <name>LastUpdate</name>
+            <repeatable>false</repeatable>
+            <label>Date de dernière mise à jour de la notice</label>
+            <description>Ce champ permet de stocker la date à laquelle la notice a été modifiée pour la dernière fois et de savoir par qui.</description>
+            <notes></notes>
+            <_id>4</_id>
+            <fields>
+                <item>
+                    <name>date</name>
+                    <type>date</type>
+                    <repeatable>false</repeatable>
+                    <label>le</label>
+                    <description>Contient la date de dernière modification de la notice au format AAAAMMJJ.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes></notes>
+                    <_id>1</_id>
+                </item>
+                <item>
+                    <name>by</name>
+                    <type>text</type>
+                    <repeatable>false</repeatable>
+                    <label>par</label>
+                    <description>Stocke l'ident du centre qui a modifié en dernier la notice.</description>
+                    <widget>textbox</widget>
+                    <datasource></datasource>
+                    <notes>Ident du producteur ou login de la personne ?</notes>
+                    <_id>2</_id>
+                </item>
+            </fields>
+        </item>
+        <item>
+            <name>Status</name>
+            <type>text</type>
+            <repeatable>true</repeatable>
+            <label>Statut de la notice</label>
+            <description><![CDATA[Ce champ contient des "tags" (visible, validée, incomplète...) qui décrivent le statut actuel de la notice.]]></description>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes>Le champ est répétable pour pouvoir gérer plusieurs statuts différents.</notes>
+            <_id>5</_id>
+        </item>
+        <item>
+            <name>StatusDate</name>
+            <type>text</type>
+            <repeatable>false</repeatable>
+            <label>Date du dernier changement de statut</label>
+            <description>Ce champ stocke la date (au format AAAAMMJJ) à laquelle la notice a changé de statut pour la dernière fois.</description>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes><![CDATA[Combiné au champ Status, ce champ permet de dire : "cette notice est en statut xxx depuis telle date".
+Il ne s'agit pas de gérer tout l'historique des changements de statut de la notice, juste le dernier.]]></notes>
+            <_id>6</_id>
+        </item>
+    </fields>
+    <indices>
+        <item>
+            <name>REF</name>
+            <label></label>
+            <description></description>
+            <analyzer>
+                <item>Fooltext\Indexing\Integer</item>
+            </analyzer>
+            <weight>1</weight>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes></notes>
+            <_id>1</_id>
+            <fields>
+                <item>Ref</item>
+            </fields>
+        </item>
+        <item>
+            <name>Owner</name>
+            <label></label>
+            <description></description>
+            <analyzer>
+                <item>Fooltext\Indexing\Lowercase</item>
+                <item>Fooltext\Indexing\Words</item>
+                <item>Fooltext\Indexing\Phrases</item>
+                <item>Fooltext\Indexing\Keywords</item>
+            </analyzer>
+            <weight>1</weight>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes></notes>
+            <_id>2</_id>
+            <fields>
+                <item>Owner</item>
+            </fields>
+        </item>
+        <item>
+            <name>Creation</name>
+            <label>Date de création</label>
+            <description></description>
+            <analyzer>
+                <item>Fooltext\Indexing\DateYMD</item>
+            </analyzer>
+            <weight>1</weight>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes></notes>
+            <_id>3</_id>
+            <fields>
+                <item>Creation.date</item>
+            </fields>
+        </item>
+        <item>
+            <name>CreatedBy</name>
+            <label></label>
+            <description></description>
+            <analyzer>
+                <item>Fooltext\Indexing\StandardTextAnalyzer</item>
+            </analyzer>
+            <weight>1</weight>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes></notes>
+            <_id>4</_id>
+            <fields>
+                <item>Creation.by</item>
+            </fields>
+        </item>
+        <item>
+            <name>LastUpdate</name>
+            <label></label>
+            <description></description>
+            <analyzer>
+                <item>Fooltext\Indexing\StandardTextAnalyzer</item>
+            </analyzer>
+            <weight>1</weight>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes></notes>
+            <_id>5</_id>
+            <fields>
+                <item>LastUpdate.date</item>
+            </fields>
+        </item>
+        <item>
+            <name>UpdatedBy</name>
+            <label></label>
+            <description></description>
+            <analyzer>
+                <item>Fooltext\Indexing\StandardTextAnalyzer</item>
+            </analyzer>
+            <weight>1</weight>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes></notes>
+            <_id>6</_id>
+            <fields>
+                <item>LastUpdate.by</item>
+            </fields>
+        </item>
+        <item>
+            <name>Title</name>
+            <label></label>
+            <description></description>
+            <analyzer>
+                <item>Fooltext\Indexing\StandardTextAnalyzer</item>
+            </analyzer>
+            <weight>1</weight>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes></notes>
+            <_id>7</_id>
+            <fields>
+                <item>title</item>
+            </fields>
+        </item>
+        <item>
+            <name>Author</name>
+            <label></label>
+            <description></description>
+            <analyzer>
+                <item>Fooltext\Indexing\StandardValuesAnalyzer</item>
+                <item>Fooltext\Indexing\Attribute</item>
+            </analyzer>
+            <weight>1</weight>
+            <widget>textbox</widget>
+            <datasource></datasource>
+            <notes></notes>
+            <_id>8</_id>
+            <fields>
+                <item>Author.name</item>
+                <item>Author.firstname</item>
+            </fields>
+        </item>
+    </indices>
+    <aliases/>
+</schema>
