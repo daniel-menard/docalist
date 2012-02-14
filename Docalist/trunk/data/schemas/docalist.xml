@@ -369,7 +369,9 @@ En terme de syntaxe, chaque valeur n'a en fait que trois formes possibles : x, x
             <description>International Standard Book Number : numéro international permettant d'identifier un livre publié.</description>
             <widget>textbox</widget>
             <datasource></datasource>
-            <notes>Numéro de 13 chiffres avec parfois un X à la place du dernier chiffre. Les anciens ISBN avaient 10 chiffres.</notes>
+            <notes>Numéro de 13 chiffres avec parfois un X à la place du dernier chiffre. Les anciens ISBN avaient 10 chiffres.
+
+Le champ est répétable, ce qui permet de stocker plusieurs ISBN (par exemple l'ancien ISBN à 10 chiffres et le nouveau à 13 chiffres).</notes>
             <_id>23</_id>
         </item>
         <item>
