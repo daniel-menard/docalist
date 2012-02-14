@@ -834,7 +834,7 @@ On pourrait peut-être cataloguer le DOI :
             <_id>34</_id>
         </item>
         <item>
-            <name>Relations</name>
+            <name>Relation</name>
             <repeatable>true</repeatable>
             <label>Relations</label>
             <description>Champ générique permettant d'établir des relations entre la notice cataloguée et d'autres notices présentes au sein de la même base de données documentaire.</description>
