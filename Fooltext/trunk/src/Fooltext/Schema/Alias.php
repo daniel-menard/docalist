@@ -14,29 +14,26 @@ namespace Fooltext\Schema;
 
 /**
  * Un alias au sein d'une collection.
+ *
+ * @property string $name Nom de l'alias.
+ * @property string $label Libellé de l'alias.
+ * @property string $description Description de l'alias.
+ * @property string $notes Notes et remarques internes.
+ *
+ * @property-read Fooltext\Schema\IndexNames $indices Liste des index qui composent cet alias.
  */
 class Alias extends Node
 {
-    /**
-     * Propriétés par défaut d'un alias.
-     *
-     * @var array
-     */
     protected static $defaults = array
     (
-        // Identifiant (numéro unique) de l'alias (non utilisé)
-    	'_id' => null,
-
-        // Nom de l'alias
         'name' => '',
-
-        // Libellé de l'alias
         'label' => '',
-
-        // Description de l'alias
         'description' => '',
+        'notes' => '',
+    );
 
-        // Liste des champs présents dans l'alias
-        'fields' => array(),
+    protected static $nodes = array
+    (
+    	'indices' => 'Fooltext\\Schema\\IndexNames',
     );
 }
