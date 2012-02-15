@@ -63,6 +63,7 @@ abstract class BaseNode implements IteratorAggregate
     protected function setParent(BaseNode $parent)
     {
         $this->parent = $parent;
+        return $this;
     }
 
     /**
@@ -104,6 +105,8 @@ abstract class BaseNode implements IteratorAggregate
         return new ArrayIterator($this->data);
     }
 
+    private $cache = array();
+
     /**
      * Retourne l'élément ayant le nom indiqué ou null si l'élément
      * demandé n'existe pas.
@@ -114,7 +117,6 @@ abstract class BaseNode implements IteratorAggregate
      * @param string $name le nom de l'élément recherché.
      * @return mixed
      */
-    private $cache = array();
     public function get($name)
     {
         static $cache = array();
@@ -202,8 +204,6 @@ abstract class BaseNode implements IteratorAggregate
      * d'employer la syntaxe unset($object->element).
      *
      * @param string $name le nom de l'élément à supprimer.
-     *
-     * @return Nodes $this
      */
     public function __unset($name)
     {
