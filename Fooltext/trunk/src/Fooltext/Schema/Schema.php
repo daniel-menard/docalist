@@ -21,6 +21,19 @@ use XMLWriter;
  * Représente un schéma.
  *
  *
+ * @property string $version Version du format.
+ * @property string $label Un libellé court décrivant le schéma.
+ * @property string $description Description, notes, historique des modifications.
+ * @property string $stopwords Liste des mots-vides à ignorer lors d'une recherche.
+ * @property string $creation Date de création du schéma.
+ * @property string $lastupdate Date de dernière mise à jour du schéma.
+ * @property string $document Nom de la classe utilisée pour représenter les documents de la base.
+ * @property string $docid Nom du champ utilisé comme identifiant unique des documents.
+ * @property string $notes Notes et remarques internes.
+ *
+ * @property-read Fooltext\Schema\Fields $fields Liste des champs du schéma.
+ * @property-read Fooltext\Schema\Indices $indices Liste des index du schéma.
+ * @property-read Fooltext\Schema\Aliases $aliases Liste des alias du schéma.
  */
 class Schema extends Node
 {
@@ -31,39 +44,28 @@ class Schema extends Node
      */
     protected static $defaults = array
     (
-        // Version du format. Initialisé dans le constructeur pour qu'on la voit dans le xml
         'version' => "2",
-
-        // Un libellé court décrivant la base
     	'label' => '',
-
-        // Description, notes, historique des modifs...
         'description' => '',
-
-        // Liste par défaut des mots-vides à ignorer lors de l'indexation
         'stopwords' => '',
-
-        // Version indexée de stopwords
         '_stopwords' => '',
-
-        // Faut-il indexer les mots vides ?
-        'indexstopwords' => true,
-
-        // Date de création du schéma
         'creation' => "",
-
-        // Date de dernière modification du schéma
         'lastupdate' => "",
+        'document' => '\\Fooltext\\Document\\Document',
+        'docid' => '',
+        'notes' => '',
     );
 
     /**
-     * Liste des collections de noeuds dont dispose un schéma.
+     * Liste des collections de noeuds dont dispose une collection.
      *
      * @var array un tableau de la forme "nom de la propriété" => "classe utilisée".
      */
     protected static $nodes = array
     (
-    	'collections' => 'Fooltext\\Schema\\Collections',
+    	'fields' => 'Fooltext\\Schema\\Fields',
+    	'indices' => 'Fooltext\\Schema\\Indices',
+        'aliases' => 'Fooltext\\Schema\\Aliases',
     );
 
     /**
@@ -125,11 +127,12 @@ class Schema extends Node
             throw new \Exception('Paramètre incorrect');
         }
 
-        // Teste la version du schéma et convertit le DOM en tableau de données en consquence
+        // Teste la version du schéma et convertit le DOM en tableau de données en conséquence
         switch($version = self::getXmlVersion($dom))
         {
             case 1: // Version 1, le schéma doit être converti
-                $data = SchemaConverter::fromVersion1($dom->documentElement);
+                $converter = new SchemaConverter();
+                return $converter->convert($dom->documentElement);
                 break;
 
             case 2: // Version 2, ok
@@ -272,7 +275,7 @@ class Schema extends Node
             }
         }
 
-        // Convertit les chaines en entiers, booléens
+        // Convertit les chaines en entiers ou en booléens
         if (is_string($value))
         {
             $h = trim($value);
@@ -337,7 +340,9 @@ class Schema extends Node
         $array = json_decode($json, true);
 
         if (is_null($array))
+        {
             throw new \Exception('JSON invalide');
+        }
 
         return new self($array);
     }
@@ -394,7 +399,11 @@ class Schema extends Node
     {
         $this->data['stopwords'] = $stopwords;
 
-        if (is_string($stopwords))
+        if (is_null($stopwords))
+        {
+            $stopwords = array();
+        }
+        elseif (is_string($stopwords))
         {
             $stopwords = str_word_count($stopwords, 1, '0123456789@_');
             // @todo : utiliser l'analyseur lowerCase.
@@ -408,17 +417,40 @@ class Schema extends Node
         $this->data['_stopwords'] = $stopwords;
     }
 
-    public function validate()
+    protected function getSlot(Index $index)
     {
-        return true;
+        $h = $index->_id;
+
+        $slot = 0;
+        for ($i= 0; $i < strlen($h); $i++)
+        {
+            $slot = $slot * 26 + ord($h[$i]) - ord('A') + 1;
+        }
+        return $slot;
     }
 
-    public function compile()
+    public function validate(array & $errors = array())
     {
+        $result = parent::validate($errors);
+        if (empty($this->version)) $this->version = self::$defaults['version'];
+
+        // Attribue un ID aux champs, aux sous-champs et aux index
+//         $this->setId($this->fields, 'a');
+//         foreach($this->fields as $field)
+//         {
+//             if ($field instanceof Group) $this->setId($field->fields, 'a');
+//         }
+//         $this->setId($this->indices, 'A');
+//         foreach($this->indices as $index)
+//         {
+//             $index->_slot = $this->getSlot($index);
+//         }
+
+        return $result;
     }
 
-    public function setLastUpdate()
-    {
-        return true;
-    }
+//     public function setLastUpdate()
+//     {
+//         return true;
+//     }
 }
