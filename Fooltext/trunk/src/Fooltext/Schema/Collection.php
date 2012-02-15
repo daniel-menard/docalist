@@ -44,6 +44,7 @@ class Collection extends Node
         'docid' => '',
     );
 
+
     /**
      * Liste des collections de noeuds dont dispose une collection.
      *
