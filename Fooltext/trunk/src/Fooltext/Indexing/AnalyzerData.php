@@ -12,7 +12,7 @@
  */
 namespace Fooltext\Indexing;
 
-use Fooltext\Schema\Field;
+use Fooltext\Schema\Index;
 
 /**
  * Structure contenant le champ à analyser et dans laquelle les analyseurs
@@ -22,12 +22,12 @@ use Fooltext\Schema\Field;
 class AnalyzerData
 {
     /**
-     * La définition du champ en cours d'analyse, telle qu'il figure
+     * La définition de l'index en cours de cration, tel qu'il figure
      * dans le {@link \Fooltext\Schema\Schema schéma} de la base de données.
      *
-     * @var \Fooltext\Schema\Field
+     * @var \Fooltext\Schema\Index
      */
-    public $field;
+    public $index;
 
     /**
      * Le contenu du champ à analyser.
@@ -81,13 +81,20 @@ class AnalyzerData
     /**
      * Constructeur.
      *
-     * @param Field $field la définition (dans le schéma) du champ à analyser.
+     * @param Index $index la définition (dans le schéma) du champ à analyser.
      * @param mixed $data le contenu du champ à analyser.
      */
-    public function __construct(Field $field, $data)
+    public function __construct(Index $index, $data)
     {
-        $this->field = $field;
+        $this->index = $index;
         $this->content = $data==='' ? array() : (array) $data;
+    }
+
+    public function reset(Index $index, $data)
+    {
+        $this->index = $index;
+        $this->content = $data==='' ? array() : (array) $data;
+        return $this;
     }
 
     /**
