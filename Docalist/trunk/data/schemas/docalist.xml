@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <schema>
-    <version>2</version>
+    <format>2</format>
     <label>Format docalist pour la base documentaire</label>
     <description>Permet de stocker et de gérer des notices bibliographiques décrivant à peu près tout type de document : articles de périodiques, ouvrages, rapports, sites web, revues, etc.</description>
     <stopwords></stopwords>
     <creation>2012/02/03 11:23:27</creation>
     <lastupdate></lastupdate>
+    <version>1</version>
     <document>\Fooltext\Document\Document</document>
     <docid></docid>
     <notes>Historique :
