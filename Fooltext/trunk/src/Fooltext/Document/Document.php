@@ -12,61 +12,52 @@
  */
 namespace Fooltext\Document;
 
-class Document extends \ArrayObject implements DocumentInterface
+use Fooltext\Schema\Schema;
+
+class Document extends FieldList
 {
-    public function __construct(array $data = array())
-    {
-        parent::__construct($data, \ArrayObject::ARRAY_AS_PROPS);
-    }
-
-    /*
-     * Lorsqu'on essaie d'accèder à un champ qui n'existe pas, l'interface
-     * DocumentInterface spécifie qu'il faut retourner la valeur null.
-     * Ce n'est pas le comportement par défaut de ArrayAccess qui, dans ce
-     * cas, génère un warning "undefined index".
-     * Pour éviter cela, on surcharge offsetGets et on teste si le champ
-     * existe ou non.
-     * Coup de chance : offsetGet est appellée quand on utilise la syntaxe
-     * $document['champ'] mais également quand on utilise la syntaxe
-     * $document->champ.
+    /**
+     * L'objet Schema auquel ce document est rattaché.
+     *
+     * Remarque : on surcharge ici la propriété héritée de FieldList uniquement
+     * pour pouvoir la documenter avec le bon type et bénéficier de la completion
+     * automatique dans eclipse.
+     *
+     * @var Schema
      */
-    public function offsetGet($field)
-    {
-        if (! isset($this[$field])) return null;
-        return parent::offsetGet($field);
-    }
+    protected $node;
 
-    public function toArray()
+    /**
+     * Contruit un nouveau document.
+     *
+     * @param Schema $schema Le schéma auquel est rattaché ce document.
+     * @param array $data les données initiales du document sous la forme d'un tableau
+     * de la forme "nom de champ" => "contenu du champ".
+     */
+    public function __construct(Schema $schema, array $data = null)
     {
-        return (array)$this;
+        $this->node = $schema;
+        if (! is_null($data)) $this->setData($data);
+
+        // remarque : le code de ce constructeur est identique à celui hérité
+        // de FieldList. On surcharge içi uniquement pour pouvoir typer et
+        // documenter correctement les paramètres.
     }
 
     public function __toString()
     {
-        $h = '';
+        $h = "\n";
         foreach($this as $name=>$value)
         {
-            if (is_scalar($value))
-            {
-                $h .= "$name: $value\n";
-            }
+            $h .= $name . ': ';
+
+            if (is_array($value))
+                $h .= '[' . implode(', ', $value) . ']';
             else
-            {
-                $h .= "$name: " . implode('¤', $value) . "\n";
-            }
+                $h .= $value;
+
+            $h .= "\n";
         }
         return $h;
     }
-
-
-    /*
-     * Les fonctions qui suivent (__get, __set, __isset, __unset) doivent
-     * être implémentées parce qu'elles figurent dans l'interface
-     * DocumentInterface, mais en fait, comme on initialise ArrayObject
-     * avec "ARRAY_AS_PROPS", elles ne seront jamais appellées.
-     */
-    public function __get($field) { }
-    public function __isset($field) { }
-    public function __unset($field) { }
-    public function __set($field,$value) { }
 }
