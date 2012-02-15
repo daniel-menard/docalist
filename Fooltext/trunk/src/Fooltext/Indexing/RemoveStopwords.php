@@ -26,10 +26,10 @@ class RemoveStopwords implements AnalyzerInterface
     public function analyze(AnalyzerData $data)
     {
         // Si on n'a pas de champ, pas de schéma, donc pas de mots vides
-        if (is_null($data->field)) return;
+        if (is_null($data->index)) return;
 
         // Récupère la liste des mots vides
-        $stopwords = $data->field->getSchema()->stopwords;
+        $stopwords = $data->index->getSchema()->stopwords;
 
         $data->map(array('terms', 'postings'), function($term) use($stopwords) {
             return isset($stopwords[$term]) ? null : $term;
