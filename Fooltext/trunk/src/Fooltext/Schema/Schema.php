@@ -21,12 +21,13 @@ use XMLWriter;
  * Représente un schéma.
  *
  *
- * @property string $version Version du format.
+ * @property string $format Format du schéma (dans quel format est le schéma).
  * @property string $label Un libellé court décrivant le schéma.
  * @property string $description Description, notes, historique des modifications.
  * @property string $stopwords Liste des mots-vides à ignorer lors d'une recherche.
  * @property string $creation Date de création du schéma.
  * @property string $lastupdate Date de dernière mise à jour du schéma.
+ * @property string $version Version du format.
  * @property string $document Nom de la classe utilisée pour représenter les documents de la base.
  * @property string $docid Nom du champ utilisé comme identifiant unique des documents.
  * @property string $notes Notes et remarques internes.
@@ -44,13 +45,14 @@ class Schema extends Node
      */
     protected static $defaults = array
     (
-        'version' => "2",
+        'format' => '2',
     	'label' => '',
         'description' => '',
         'stopwords' => '',
         '_stopwords' => '',
-        'creation' => "",
-        'lastupdate' => "",
+        'creation' => '',
+        'lastupdate' => '',
+        'version' => '1',
         'document' => '\\Fooltext\\Document\\Document',
         'docid' => '',
         'notes' => '',
@@ -162,7 +164,7 @@ class Schema extends Node
      */
     protected static function getXmlVersion(DOMDocument $xml)
     {
-        $nodes = $xml->documentElement->getElementsByTagName('version');
+        $nodes = $xml->documentElement->getElementsByTagName('format');
 
         if ($nodes->length === 0)
         {
@@ -432,7 +434,7 @@ class Schema extends Node
     public function validate(array & $errors = array())
     {
         $result = parent::validate($errors);
-        if (empty($this->version)) $this->version = self::$defaults['version'];
+        if (empty($this->format)) $this->format = self::$defaults['format'];
 
         // Attribue un ID aux champs, aux sous-champs et aux index
 //         $this->setId($this->fields, 'a');
