@@ -17,8 +17,7 @@ use ArrayIterator;
 use XMLWriter;
 
 /**
- * Classe de base parente des classes Node et Nodes.
- *
+ * Classe abstraite représentant un noeud du schéma.
  *
  * @package     Fooltext
  * @subpackage  Schema
@@ -34,12 +33,12 @@ abstract class BaseNode implements IteratorAggregate
 
 
     /**
-     * Noeud parent de ce noeud.
+     * Le noeud parent de ce noeud.
      *
      * Cette propriété est initialisée automatiquement lorsqu'un noeud
      * est ajouté dans une {@link Nodes collection de noeuds}.
      *
-     * @var Nodes
+     * @var BaseNode
      */
     protected $parent = null;
 
@@ -48,7 +47,7 @@ abstract class BaseNode implements IteratorAggregate
      * Retourne le noeud parent de ce noeud ou null si le noeud
      * n'a pas encore été ajouté comme fils d'un noeud existant.
      *
-     * @return Nodes
+     * @return BaseNode
      */
     protected function getParent()
     {
@@ -58,7 +57,7 @@ abstract class BaseNode implements IteratorAggregate
     /**
      * Modifie le parent de ce noeud.
      *
-     * @param Nodes $parent
+     * @param BaseNode $parent
      * @return BaseNode $this
      */
     protected function setParent(BaseNode $parent)
@@ -78,7 +77,7 @@ abstract class BaseNode implements IteratorAggregate
     }
 
     /**
-     * Retourne un tableau contenant toutes les données du noeud.
+     * Retourne les données du noeud.
      *
      * Pour un objet {@link Node}, la méthode retourne les propriétés du noeud.
      * Pour un objet {@link Nodes} elle retourne la liste des noeuds fils.
@@ -106,6 +105,112 @@ abstract class BaseNode implements IteratorAggregate
     }
 
     /**
+     * Retourne l'élément ayant le nom indiqué ou null si l'élément
+     * demandé n'existe pas.
+     *
+     * Si la classe contient un getter pour cette propriété (i.e. une méthode nommée
+     * get + nom de la propriété), celui-ci est appellé.
+     *
+     * @param string $name le nom de l'élément recherché.
+     * @return mixed
+     */
+    private $cache = array();
+    public function get($name)
+    {
+        static $cache = array();
+
+        if( isset($this->cache[$name])) return $this->cache[$name];
+        $sav = $name;
+        $name = strtolower($name);
+
+        // Remarque : il n'y a pas besoin d'appeller ucfirst() pour construire le nom
+        // exact de la méthode à appeller car "php methods are case insensitive"
+        // (documenté explictement dans la page php.net/functions.user-defined)
+
+        $getter = 'get' . $name;
+        if (method_exists($this, $getter))
+        {
+            return $this->cache[$sav] = $this->$getter($name);
+        }
+
+        if (array_key_exists($name, $this->data))
+        {
+            return $this->cache[$sav] = $this->data[$name];
+        }
+
+        return $this->cache[$sav] = null;
+    }
+
+    /**
+     * Indique si l'objet contient l'élément dont le nom est indiqué.
+     *
+     * @param string $name le nom de l'élément recherché.
+     * @return boolean
+     */
+    public function has($name)
+    {
+        return isset($this->data[strtolower($name)]);
+    }
+
+    /**
+     * Supprime l'élément ayant le nom indiqué.
+     *
+     * @param string $name le nom de l'élément à supprimer.
+     *
+     * @return BaseNode $this
+     */
+    public function delete($name)
+    {
+        unset($this->data[strtolower($name)]);
+        return $this;
+    }
+
+    /**
+     * Retourne l'élément ayant le nom indiqué ou null si l'élément
+     * demandé n'existe pas.
+     *
+     * Cette méthode fait la même chose que {@link get()} mais permet
+     * d'employer la syntaxe $object->element.
+     *
+     * @param string $name le nom de l'élément recherché.
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        return $this->get($name);
+    }
+
+    /**
+     * Indique si une propriété existe.
+     *
+     * Cette méthode fait la même chose que {@link has()} mais permet
+     * d'employer la syntaxe isset($object->element).
+     *
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function __isset($name)
+    {
+        return $this->has($name);
+    }
+
+    /**
+     * Supprime l'élément ayant le nom indiqué.
+     *
+     * Cette méthode fait la même chose que {@link delete()} mais permet
+     * d'employer la syntaxe unset($object->element).
+     *
+     * @param string $name le nom de l'élément à supprimer.
+     *
+     * @return Nodes $this
+     */
+    public function __unset($name)
+    {
+        $this->delete($name);
+    }
+
+    /**
      * Méthode utilisée par {@link Schema::toXml()} pour sérialiser un schéma en XML.
      *
      * Ajoute les propriétés du noeud dans l'objet {@link XMLWriter} passé en paramètre.
@@ -127,4 +232,9 @@ abstract class BaseNode implements IteratorAggregate
      * @param string $colon chaine à utiliser pour générer le signe ":".
      */
     protected abstract function _toJson($indent = 0, $currentIndent = '', $colon = ':');
+
+    public function validate(array & $errors = array())
+    {
+        return true;
+    }
 }
