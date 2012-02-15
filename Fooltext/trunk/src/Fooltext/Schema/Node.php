@@ -15,7 +15,7 @@ namespace Fooltext\Schema;
 use XMLWriter;
 
 /**
- * Classe de base (abstraite) représentant un noeud dans un schéma.
+ * Classe abstraite représentant un noeud dans un schéma.
  *
  * Un noeud est un objet qui peut contenir des propriétés (cf. {@link __get()},
  * {@link __set()}, {@link __isset()}, {@link __unset()} et {@link getData()}).
@@ -63,7 +63,6 @@ abstract class Node extends BaseNode
      */
     protected static $ignore = array();
 
-
     /**
      * Crée un nouveau noeud.
      *
@@ -89,7 +88,7 @@ abstract class Node extends BaseNode
                 {
                     $nodes = new $class();
                 }
-                elseif (is_null($nodes) || is_array($nodes))
+                elseif (is_array($nodes))
                 {
                     $nodes = new $class($nodes);
                 }
@@ -102,61 +101,33 @@ abstract class Node extends BaseNode
             }
             else
             {
-                $this->data[$name] = new $class();
+                $nodes = new $class();
+                $nodes->setParent($this);
+                $this->data[$name] = $nodes;
             }
         }
 
         // Et enfin les données fournies en paramètre
         foreach($data as $name => $value)
         {
-            $this->__set($name, $value);
+            $this->set($name, $value);
         }
-    }
-
-    /**
-     * Retourne la propriété ayant le nom indiqué ou null si la propriété
-     * demandée n'existe pas.
-     *
-     * Si la classe contient un getter pour cette propriété (i.e. une méthode nommée
-     * get + nom de la propriété), celui-ci est appellé.
-     *
-     * @param string $name
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        $getter = 'get' . $name;
-
-        // Remarque : il n'y a pas besoin d'appeller ucfirst() pour construire le nom
-        // exact de la méthode à appeller car "php methods are case insensitive"
-        // (documenté explictement dans la page php.net/functions.user-defined)
-
-        if (method_exists($this, $getter))
-        {
-            return $this->$getter($name);
-        }
-
-        if (array_key_exists($name, $this->data))
-        {
-            return $this->data[$name];
-        }
-
-        return null;
     }
 
     /**
      * Ajoute ou modifie une propriété.
      *
-     * Si la valeur indiquée est null, la propriété est supprimée du noeud
-     * ou revient à sa valeur par défaut si c'est une propriété prédéfinie.
-     *
      * Si la classe contient un setter pour cette propriété (i.e. une méthode nommée
      * set + nom de la propriété), celui-ci est appellé pour modifier la propriété.
      *
+     * Si la valeur indiquée est null, la propriété est supprimée du noeud
+     * ou revient à sa valeur par défaut si c'est une propriété prédéfinie.
+     *
      * @param string $name le nom de la propriété à modifier.
      * @param mixed $value la nouvelle valeur de la propriété.
+     * @return Node
      */
-    public function __set($name, $value = null)
+    public function set($name, $value = null)
     {
         $setter = 'set' . $name;
 
@@ -167,36 +138,34 @@ abstract class Node extends BaseNode
 
         if (is_null($value))
         {
-            $this->__unset($name);
+            $this->delete($name);
         }
         else
         {
             $this->data[$name] = $value;
         }
+
+        return $this;
     }
 
     /**
-     * Indique si une propriété existe.
+     * Modifie l'élément ayant le nom indiqué.
      *
-     * @param string $name
+     * Cette méthode fait la même chose que {@link delete()} mais permet
+     * d'employer la syntaxe $object->element = $value.
      *
-     * @return bool
+     * @param string $name l'élément à modifier.
+     *
+     * @return Nodes $this
      */
-    public function __isset($name)
+    public function __set($name, $value = null)
     {
-        return array_key_exists($name, $this->data);
+        return $this->set($name, $value);
     }
 
-    /**
-     * Supprime la propriété indiquée ou la réinitialise à sa valeur par défaut
-     * s'il s'agit d'une propriété prédéfinie.
-     *
-     * Sans effet si la propriété n'existe pas.
-     *
-     * @param string $name
-     */
-    public function __unset($name)
+    public function delete($name)
     {
+        $name = strtolower($name);
         if (isset(static::$defaults[$name]))
         {
             $this->data[$name] = static::$defaults[$name];
@@ -205,6 +174,8 @@ abstract class Node extends BaseNode
         {
             unset($this->data[$name]);
         }
+
+        return $this;
     }
 
     /**
@@ -217,11 +188,16 @@ abstract class Node extends BaseNode
         return static::$defaults;
     }
 
+    public function propertyIsIgnored($name)
+    {
+        return isset(static::$ignore[$name]) && static::$ignore[$name];
+    }
+
     protected function _toXml(XMLWriter $xml)
     {
         foreach($this->data as $name=>$value)
         {
-            if (isset(static::$ignore[$name]) && static::$ignore[$name]) continue;
+            if ($this->propertyIsIgnored($name)) continue;
 
 //            if (array_key_exists($name, static::$defaults) && static::$defaults[$name] === $value) continue;
 
@@ -247,7 +223,7 @@ abstract class Node extends BaseNode
                 }
                 $xml->endElement();
             }
-            elseif ($value instanceof Nodes)
+            elseif ($value instanceof BaseNode)
             {
                 $xml->startElement($name);
 //                 $xml->writeAttribute('nextid', $value->getNextId());
@@ -293,12 +269,10 @@ abstract class Node extends BaseNode
         $h ='';
         foreach($this->data as $name=>$value)
         {
-            if (isset(static::$ignore[$name]) && static::$ignore[$name]) continue;
-
-//             if (isset(static::$defaults[$name]) && static::$defaults[$name] === $value) continue;
+            if ($this->propertyIsIgnored($name)) continue;
 
             $h .= $currentIndent . json_encode($name) . $colon;
-            if ($value instanceof Nodes)
+            if ($value instanceof BaseNode)
             {
                 $h .= $currentIndent . '[';
                 $h .= $value->_toJson($indent, $currentIndent . str_repeat(' ', $indent), $colon);
@@ -311,5 +285,18 @@ abstract class Node extends BaseNode
         }
 
         return rtrim($h, ',');
+    }
+
+    public function validate(array & $errors = array())
+    {
+//         echo "Appel de ", substr(__METHOD__,16), '(', substr(get_class($this),16), ' ', $this->name, ')<br />';
+//         echo '<blockquote>';
+        $result = parent::validate($errors);
+        foreach (static::$nodes as $name => $class)
+        {
+            $result &= $this->$name->validate($errors);
+        }
+//         echo '</blockquote>';
+        return $result;
     }
 }
