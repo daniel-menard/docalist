@@ -14,9 +14,26 @@ namespace Fooltext\Schema;
 
 /**
  * Un champ au sein d'une collection.
+ *
+ * @property int $_id Identifiant (numéro unique) du champ.
+ * @property string $name Nom du champ.
+ * @property string $type Type du champ (sous forme de chaine).
+ * @property int $_type Type du champ (sous forme de constante).
+ * @property bool $repeatable Indique si le champ est répétable.
+ * @property string $label Libellé du champ.
+ * @property string $description Description du champ.
+ * @property string $widget Widget utilisé pour représenter ce champ dans un formulaire de saisie.
+ * @property string $datasource Table utilisée pour les widgets comme radiolist, checklist ou select.
+ * @property string $notes Notes et remarques internes.
  */
 class Field extends Node
 {
+    const TEXT = 1;
+    const INT = 2;
+    const AUTONUMBER = 3;
+    const BOOL = 4;
+    const DATE = 5;
+
     /**
      * Propriétés par défaut d'un champ.
      *
@@ -24,70 +41,38 @@ class Field extends Node
      */
     protected static $defaults = array
     (
-        // Identifiant (numéro unique) du champ
-		'_id' => null,
-
-        // Nom du champ, d'autres noms peuvent être définis via des alias
         'name' => '',
-
-        // Type du champ
         'type' => 'text',
-
         'repeatable' => false,
-
-        // Traduction de la propriété type en entier
-        '_type' => null,
-
-        // Libellé du champ
+        '_type' => Field::TEXT,
         'label' => '',
-
-        // Description
         'description' => '',
-
     	'widget' => 'textbox',
     	'datasource' => '',
-
-    	'analyzer' => array(),
-
-    	'weight' => 1,
+        'notes' => '',
+		'_id' => null,
     );
 
-    /**
-     * Setter pour la propriété 'analyzer' du champ.
-     *
-     * Vérifie que les analyseurs indiqués existent et stocke le résultat sous
-     * forme de tableau. Le nom de classe d'un analyseur peut être indiqué avec ou
-     * sans namespace. Si aucune namespace ne figure dans le nom de la classe, la
-     * méthode ajoute le namespace Fooltext\Indexing\.
-     *
-     * @param string|array $value le nom de l'analyseur (ou un tableau d'analyseurs)
-     * à utiliser pour ce champ.
-     *
-     * @throws \Exception Si l'analyseur indiqué n'existe pas ou s'il n'implémente
-     * pas l'interface {@link Fooltext\Indexing\AnalyzerInterface}.
-     */
-    public function setAnalyzer($value)
+    protected static $ignore = array('_type' => true);
+
+    protected function setType($value)
     {
-        if (is_scalar($value)) $value = array($value);
+        $value = strtolower($value);
+        $map = array
+        (
+            'text' => self::TEXT,
+            'int' => self::INT,
+            'autonumber' => self::AUTONUMBER,
+            'bool' => self::BOOL,
+            'date' => self::DATE,
+        );
 
-        foreach($value as & $analyzer)
+        if (! isset($map[$value]))
         {
-            if (false === strpos($analyzer, '\\'))
-            {
-                $analyzer = 'Fooltext\\Indexing\\' . $analyzer;
-            }
-
-            if (! class_exists($analyzer))
-            {
-                throw new \Exception("Classe $analyzer non trouvée");
-            }
-
-            $interfaces = class_implements($analyzer);
-            if (! isset($interfaces['Fooltext\\Indexing\\AnalyzerInterface']))
-            {
-                throw new \Exception("La classe $analyzer n'est pas un analyseur");
-            }
+            throw new \Exception('Type de champ incorrect : $value');
         }
-        $this->data['analyzer'] = $value;
+
+        $this->data['type'] = $value;
+        $this->data['_type'] = $map[$value];
     }
 }
