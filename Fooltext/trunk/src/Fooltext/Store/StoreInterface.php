@@ -37,70 +37,51 @@ interface StoreInterface
      *
      * @param int $id l'ID du document recherché.
      *
-     * @return Document le document recherché ou null si
-     * l'ID demandé n'existe pas.
+     * @return DocumentInterface le document recherché ou null si
+     * l'ID indiqué n'existe pas dans la collection.
      */
-    // public function get($id);
+    public function get($id);
 
     /**
      * Ajoute ou modifie un document.
      *
-     * Si le document ne figure pas déjà dans la base (i.e. il n'a pas
-     * encore d'ID), il est ajouté, sinon, il est mis à jour.
+     * Si le document ne figure pas déjà dans la collection (i.e. il
+     * n'a pas encore d'ID), il est ajouté, sinon, il est mis à jour.
      *
-     * @param Document $doc
+     * Vous pouvez passer en paramètre un tableau ou un objet itérable.
      *
-     * todo : pourrait accepter un tableau de documents ?
-     * (ajout/modification par lots)
+     * @param array|Traversable $document
      */
-    // public function put(Document $document);
+    public function put($document);
 
     /**
-     * Supprime un document.
+     * Supprime un document de la collection.
      *
      * @param int $id l'ID du document à supprimer.
      *
      * @return int le nombre d'enregistrements supprimés.
      */
-    // public function delete($id);
+    public function delete($id);
+
+    /**
+     * Retourne les options de recherche par défaut.
+     *
+     * La méthode retourne un tableau qui contient les options de
+     * recherche supportées par l'argument $options de la méthode
+     * {@link find()} et leurs valeurs par défaut.
+     *
+     * @return array
+     */
+    public function getSearchOptions();
 
     /**
      * Recherche des documents.
      *
-     * @param unknown_type $query
+     * @param Query $query
      * @param array $options
-     * @return DocumentSet
+     * @return DocumentSetInterface
      */
-    // public function find($query, array $options);
-
-    // Manipulation de plusieurs enregistrements à la fois
-
-    /**
-     * Retourne plusieurs documents identifiés par leurs ID.
-     *
-     * @param array|Traversable $id un tableau ou un objet
-     * itérable contenant les identifiants des documents à
-     * retourner.
-     *
-     * @return array(Document)
-     */
-    // public function getMany($id);
-
-
-    /**
-     * Ajoute ou modifie plusieurs documents.
-     *
-     * @param array|Traversable $documents
-     */
-    // public function putMany(& $documents);
-
-    /**
-     * Supprime plusieurs documents.
-     *
-     * @param array|Traversable $documents
-     */
-    // public function deleteMany($documents);
-
+    public function find(Query $query, array $options = array());
 
     // Fonctions d'information
 
@@ -125,36 +106,4 @@ interface StoreInterface
      * @param \Fooltext\Schema\Schema $schema
      */
     public function setSchema(Schema $schema);
-
-    /**
-     * Retourne les noms des collections définies dans la base.
-     *
-     * @return array
-     */
-    public function getCollectionNames();
-
-    /**
-     * Retourne la collection dont le nom est indiqué.
-     *
-     * __get() est une méthode magique de php qui permet d'accèder
-     * à une collection comme s'il s'agissait d'une propriété de la
-     * base de données (exemple : $db->records).
-     *
-     * @param string $collection
-     * @return CollectionInterface
-     * @throws \Exception si la collection indiquée n'existe pas.
-     */
-    public function __get($collection);
-
-    /**
-     * Indique si la collection dont le nom est indiqué existe dans la base.
-     *
-     * __isset() est une méthode magique de php qui permet d'accèder
-     * à une collection comme s'il s'agissait d'une propriété de la
-     * base de données (exemple : isset($db->records)).
-     *
-     * @param string $collection
-     * @return bool
-     */
-    public function __isset($collection);
 }
