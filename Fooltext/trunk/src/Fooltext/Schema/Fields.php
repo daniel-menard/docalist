@@ -17,7 +17,21 @@ namespace Fooltext\Schema;
  *
  * C'est une collection d'objets {@link Field}.
  */
+use Fooltext\Schema\Field;
+use Fooltext\Schema\Group;
+
 class Fields extends Nodes
 {
     protected static $class = 'Fooltext\\Schema\\Field';
+    protected static $initialID = 'a';
+
+    public function add($child)
+    {
+        // Crée soit un Field soit un Group selon que la clé fields existe
+        if (is_array($child))
+        {
+            $child = isset($child['fields']) ? new Group($child) : new Field($child);
+        }
+        return parent::add($child);
+    }
 }
