@@ -12,6 +12,7 @@
  */
 namespace Fooltext\QueryParser;
 
+use Fooltext\Query\Query;
 use Fooltext\Query\OrQuery;
 use Fooltext\Query\AndQuery;
 use Fooltext\Query\NotQuery;
@@ -52,6 +53,13 @@ class Parser
         $this->token = $this->lexer->read($equation);
     }
 
+    /**
+     * Analyse une équation de recherche et construit l'objet Query correspondant.
+     *
+     * @param string $equation
+     * @param string $defaultField
+     * @return Query
+     */
     public function parseQuery($equation, $defaultField = null)
     {
         // Initialise le lexer
