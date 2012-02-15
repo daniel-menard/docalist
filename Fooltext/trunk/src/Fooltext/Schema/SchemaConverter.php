@@ -31,155 +31,32 @@ class SchemaConverter
      * @param DOMDocument $xml
      * @return Schema
      */
-    public static function fromVersion1(DOMElement $node)
+    public function convert(DOMElement $node)
     {
-        $data = self::_fromVersion1($node);
-
-        if (isset($data['aliases']))
+        $data = $this->domToArray($node);
+        $schema = new Schema();
+        foreach($data as $name=>$value)
         {
-            foreach ($data['aliases'] as $i => & $alias)
+            switch ($name)
             {
-                $fields = array();
-                foreach($alias['indices'] as $index)
-                {
-                    $fields[] = $index['name'];
-                }
-                unset($alias['indices']);
-                $alias['fields'] = $fields;
-            }
-            unset($alias);
-        }
-
-        $collection = array('name' => 'CONVERTED');
-
-        foreach(array('fields', 'aliases') as $prop)
-        {
-            if (isset($data[$prop]))
-            {
-                $t = array();
-                foreach($data[$prop] as $item)
-                {
-                    $t[strtolower($item['name'])] = $item;
-                }
-                $collection[$prop] = $t;
-                unset($data[$prop]);
+                case 'fields':
+                case 'indices':
+                case 'aliases':
+                case 'lookuptables':
+                case 'sortkeys':
+                    $this->$name($schema, $value);
+                    break;
+                case '_lastid':
+                    unset($data[$name]);
+                    break;
+                default:
+                    $schema->set($name, $value);
             }
         }
-
-        $props = array
-        (
-            'words' => 'Fooltext\\Indexing\\Words',
-            'phrases' => 'Fooltext\\Indexing\\Phrases',
-            'values' => 'Fooltext\\Indexing\\Keywords',
-            'count' => 'Fooltext\\Indexing\\Countable',
-        );
-
-        if (isset($data['indices']))
-        {
-            foreach ($data['indices'] as $i => $index)
-            {
-                $fields = $index['fields'];
-
-                $all = array();
-                foreach ($fields as $field)
-                {
-                    $fieldName = strtolower($field['name']);
-
-                    if (isset($collection['fields'][$fieldName]['type'])
-                        && $collection['fields'][$fieldName]['type'] === 'autonumber')
-                    {
-                        $collection['fields'][$fieldName]['analyzer'] = 'Fooltext\\Indexing\\Integer';
-                        unset($collection['fields'][$fieldName]['defaultstopwords']);
-                    }
-                    else
-                    {
-
-                        if (isset($field['phrases']) && isset($field['words'])) unset($field['words']);
-
-                        $analyzer = array();
-                        foreach($props as $prop=>$class)
-                        {
-                            if (isset($field[$prop]))
-                            {
-                                if (empty($analyzer)) $analyzer[] = 'Fooltext\\Indexing\\Lowercase';
-                                $analyzer[] = $class;
-                            }
-                        }
-
-                        if (isset($collection['fields'][$fieldName]['defaultstopwords'])
-                            && $collection['fields'][$fieldName]['defaultstopwords'] === 'false')
-                        {
-                            $analyzer[] = 'Fooltext\\Indexing\\RemoveStopwords';
-                        }
-                        unset($collection['fields'][$fieldName]['defaultstopwords']);
-
-                        if (isset($index['spelling'])) $analyzer[] = 'Fooltext\\Indexing\\Spellings';
-
-                        $collection['fields'][$fieldName]['analyzer'] = $analyzer;
-
-                        foreach(array('weight', 'start', 'end') as $prop)
-                        {
-                            if (isset($field[$prop]))
-                            {
-                                $collection['fields'][$fieldName][$prop] = $field[$prop];
-                            }
-                        }
-
-                        $all[] = $field['name'];
-                    }
-                }
-
-                if (count($all) > 1)
-                {
-                   $index['fields'] = $all;
-                   unset($index['spelling']);
-                   if (isset($collection['aliases'][$index['name']]))
-                   {
-                       $index['name'] .= '2';
-                   }
-                   $collection['aliases'][$index['name']] = $index;
-                }
-            }
-        }
-        unset($data['indices']);
-
-        if (isset($data['sortkeys']))
-        {
-            foreach ($data['sortkeys'] as $i => $key)
-            {
-                $fields = array();
-                foreach($key['fields'] as $field)
-                {
-                    $field = & $collection['fields'][strtolower($field['name'])];
-                    $field['analyzer'][] = 'Fooltext\\Indexing\\Attribute';
-                    unset($field);
-                }
-            }
-        }
-        unset($data['sortkeys']);
-
-        if (isset($data['lookuptables']))
-        {
-            foreach ($data['lookuptables'] as $i => $table)
-            {
-                $fields = array();
-                foreach($table['fields'] as $field)
-                {
-                    $field = & $collection['fields'][strtolower($field['name'])];
-                    array_unshift($field['analyzer'], 'Fooltext\\Indexing\\Lookup');
-                    unset($field);
-                }
-            }
-        }
-
-        unset($data['lookuptables']);
-
-        $data['collections'] = array($collection);
-
-        return $data;
+        return $schema;
     }
 
-    public static function _fromVersion1(DOMElement $node)
+    public function domToArray(DOMElement $node)
     {
         $data = array();
 
@@ -200,13 +77,109 @@ class SchemaConverter
                 case 'sortkeys':
                     foreach($child->childNodes as $item)
                     {
-                        $data[$child->nodeName][] = self::_fromVersion1($item);
+                        $data[$child->nodeName][] = $this->domToArray($item);
                     }
+                    break;
+                case 'description':  // to remove
                     break;
                 default:
                     $data[$child->nodeName] = $child->nodeValue;
             }
         }
         return $data;
+    }
+
+    protected function fields(Schema $schema, array $data)
+    {
+        foreach($data as $name=>$field)
+        {
+            unset($field['_type']);
+            unset($field['defaultstopwords']);
+            unset($field['description']); // to remove
+            $schema->fields->add($field);
+        }
+    }
+
+    protected function indices(Schema $schema, array $data)
+    {
+        $props = array
+        (
+            'words' => 'Fooltext\\Indexing\\Words',
+            'phrases' => 'Fooltext\\Indexing\\Phrases',
+            'values' => 'Fooltext\\Indexing\\Keywords',
+            'count' => 'Fooltext\\Indexing\\Countable',
+        );
+
+        foreach($data as $oldindex)
+        {
+            $indexname = $oldindex['name'];
+//            echo "Conversion de l'index $indexname<br />";
+            $index = new Index();
+            $index->name = $indexname;
+            $t = array();
+            $defaultstopwords = true;
+            foreach($oldindex['fields'] as $field)
+            {
+                $name = $field['name'];
+                $index->fields->add($name);
+                foreach($props as $prop=>$class)
+                {
+                    $value = isset($field[$prop]);
+                    if (isset($t[$prop]) && $t[$prop] !== $value)
+                    {
+                        $warning = "Les champs de l'index $indexname n'ont pas tous la même valeur pour $prop.";
+                    }
+                    if ($value) $t[$prop] = true;
+                }
+
+                $newfield = $schema->fields->get($name);
+                if ($newfield->get('defaultstopwords') === 'false')
+                {
+                    $defaultstopwords = false;
+                    unset($newfield->defaultstopwords);
+                }
+
+                foreach(array('weight', 'start', 'end') as $prop)
+                {
+                    if (isset($field[$prop]))
+                    {
+                        $index->set($prop, $field[$prop]);
+                    }
+                }
+            }
+
+            if (isset($t['phrases']) && isset($t['words'])) unset($t['words']);
+
+            $analyzer = array();
+            foreach($t as $prop=>$nu)
+            {
+                if (empty($analyzer)) $analyzer[] = 'Fooltext\\Indexing\\Lowercase';
+                $analyzer[] = $props[$prop];
+            }
+
+            if (! $defaultstopwords) $analyzer[] = 'Fooltext\\Indexing\\RemoveStopwords';
+
+            if (isset($oldindex['spelling'])) $analyzer[] = 'Fooltext\\Indexing\\Spellings';
+
+            $index->analyzer = $analyzer;
+
+
+            $schema->indices->add($index);
+        }
+    }
+
+    protected function aliases(Schema $schema, array $data)
+    {
+
+    }
+
+    protected function lookuptables(Schema $schema, array $data)
+    {
+
+    }
+
+    protected function sortkeys(Schema $schema, array $data)
+    {
+
     }
 }
