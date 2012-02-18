@@ -269,7 +269,7 @@ class XapianStore implements StoreInterface
         // Enregistre les données
         $doc->set_data(json_encode($document));
 
-        $docId = (int) $document['REF']; // @todo allouer un id au doc + utiliser la propriété docid du schéma
+        $docId = (int) $document['Ref']; // @todo allouer un id au doc + utiliser la propriété docid du schéma
         $doc->add_boolean_term($docId);
 
         foreach($this->schema->get('indices') as $index)
