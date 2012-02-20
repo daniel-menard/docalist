@@ -32,7 +32,7 @@ class DateYMD implements AnalyzerInterface
      *
      * @var array
      */
-    protected $monthes = array
+    static protected $monthes = array
     (
         '01' => array('january', 'janvier', 'janv', 'jan'),
         '02' => array('february', 'fevrier', 'fevr', 'feb', 'fev'),
@@ -52,10 +52,42 @@ class DateYMD implements AnalyzerInterface
     {
         foreach ($data->content as $value)
         {
-            if (strlen($value) < 8) continue;
-            $terms = self::$monthes[substr($value, 4, 2)];
-            array_unshift($terms, substr($value, 0, 4));
-            array_push($terms, substr($value, 6, 2));
+            $value = strtr($value, array('/'=>'', '-'=>'', '(' => '', ')' => ''));
+
+            $len = strlen($value);
+
+            // on a seulement l'année (ou autre chose)
+            if ($len <= 4)
+            {
+                $data->terms[] = $value;
+                continue;
+            }
+
+            // AAAAMMJJ
+            // 01234567
+
+            // on a au moins l'année et le mois
+            $month = substr($value, 4, 2);
+            if (isset(self::$monthes[$month]))
+            {
+                $terms = self::$monthes[$month]; // noms des mois
+            }
+            else
+            {
+                $terms = array(); // mois invalide
+            }
+
+            array_unshift($terms, substr($value, 0, 4)); // année
+
+            array_unshift($terms, substr($value, 0, 6)); // année et mois au format
+
+            // on a les jours
+            if ($len > 6)
+            {
+                array_push($terms, substr($value, 6, 2));
+                array_unshift($terms, $value); // année, mois et jour au format AAAAMMJJ
+            }
+
             $data->terms[] = $terms;
         }
     }
