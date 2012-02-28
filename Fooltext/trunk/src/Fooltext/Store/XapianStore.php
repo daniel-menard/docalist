@@ -22,7 +22,9 @@ use Fooltext\Schema\Group;
 use Fooltext\Schema\Index;
 use Fooltext\Schema\Exception\NotFound;
 
-use Fooltext\QueryParser\Parser;
+use Fooltext\Store\SearchRequest;
+use \XapianQueryParser;
+use \XapianSimpleStopper;
 
 /**
  * Une base de données Xapian.
@@ -51,11 +53,16 @@ class XapianStore implements StoreInterface
     protected $schema;
 
     /**
-     * QueryParser
-     *
-     * @var Parser
+     * @var XapianQueryParser
      */
-    protected $queryParser;
+    protected $xapianQueryParser;
+
+    /**
+     *
+     * @var XapianSimpleStopper
+     */
+    protected $xapianStopper;
+
 
     /**
      * Cache des analyseurs déjà créés pour l'indexation.
@@ -278,7 +285,8 @@ class XapianStore implements StoreInterface
             // remarque : Schema::validate impose qu'il y ait au moins 1 analyseur/index
             $data = $index->getData();
             $classes = $data['analyzer'];
-            $prefix = $data['_id'];
+            $id = $data['_id'];
+            $prefix = $id . ':';
             $weight = $data['weight'];
             $field = $data['_field'];
             $fields = $data['fields']->getData();
@@ -292,7 +300,9 @@ class XapianStore implements StoreInterface
                 $data = array();
                 if (isset($document[$field]))
                 {
-                    foreach((array) $document[$field] as $item)
+                    $t = $document[$field];
+                    if (key($t)!==0) $t = array($t);
+                    foreach($t as $item)
                     {
                         $value = null;
                         foreach($fields as $i=>$zone)
@@ -300,10 +310,38 @@ class XapianStore implements StoreInterface
                             $zone = substr($zone, $start);
                             if (isset($item[$zone]))
                             {
-                                if (is_null($value)) $value = $item[$zone]; else $value .= '|' . $item[$zone];
+                                if (is_null($value))
+                                {
+                                    $value = $item[$zone];
+                                }
+                                elseif (is_scalar($value))
+                                {
+                                    $value .= '|' . $item[$zone];
+                                }
+                                else
+                                {
+                                    if (! is_array($item[$zone]))
+                                    {
+                                        echo "PROBLEME SUR L'INDEX ", $index->name, "<br />";
+                                        echo "Actuellement, value contient", print_r($value,true), "<br />";
+                                        echo "Zone=$zone et contenu = ", var_export($item[$zone],true), "<br />";
+                                    }
+                                    $value = array_merge($value, $item[$zone]);
+                                }
                             }
                         }
-                        $data[] = $value;
+
+                        if (! is_null($value))
+                        {
+                            if (is_array($value))
+                            {
+                                $data = array_merge($data, $value);
+                            }
+                            else
+                            {
+                                $data[] = $value;
+                            }
+                        }
                     }
                 }
             }
@@ -339,7 +377,7 @@ class XapianStore implements StoreInterface
                 self::$analyzerCache[$class]->analyze($data);
             }
 
-            if ($dump) $data->dump("Index $index->name");
+            if ($dump) $data->dump("Index $index->name (" . implode(', ', $classes) . ")");
 
             foreach($data->terms as $term)
             {
@@ -348,12 +386,6 @@ class XapianStore implements StoreInterface
                     if (strlen($term) > self::MAX_TERM) continue;
                     $doc->add_term($prefix . $term, $weight);
                 }
-//                 $termGenerator->index_text_without_positions
-//                 (
-//                     implode(' ', (array)$term),
-//                     $weight,
-//                     $prefix
-//                 );
             }
 
             $start = 0;
@@ -367,13 +399,6 @@ class XapianStore implements StoreInterface
 
                 $start += 100;
                 $start -= $start % 100;
-
-//                 $termGenerator->index_text
-//                 (
-//                     implode(' ', (array)$term),
-//                     $weight,
-//                     $prefix
-//                 );
             }
 
             foreach($data->keywords as $term)
@@ -383,12 +408,6 @@ class XapianStore implements StoreInterface
                     if (strlen($term) > self::MAX_TERM) continue;
                     $doc->add_boolean_term($prefix . $term);
                 }
-//                 $termGenerator->index_text_without_positions
-//                 (
-//                     implode(' ', (array)$term),
-//                     0,
-//                     $prefix
-//                 );
             }
 
             foreach($data->spellings as $term)
@@ -402,7 +421,7 @@ class XapianStore implements StoreInterface
 
             foreach($data->lookups as $term)
             {
-                $p = $prefix . ':';
+                $p = 'T' . $prefix;
                 foreach((array)$term as $term)
                 {
                     if (strlen($term) > self::MAX_TERM) continue;
@@ -412,10 +431,9 @@ class XapianStore implements StoreInterface
 
             foreach($data->sortkeys as $term)
             {
-                $slot = $index->_slot;
                 foreach((array)$term as $term)
                 {
-                    $doc->add_value($slot, $term);
+                    $doc->add_value($id, $term);
                 }
             }
 
@@ -442,33 +460,225 @@ class XapianStore implements StoreInterface
         return $this;
     }
 
-    public function getSearchOptions()
+    public function find(SearchRequest $request)
     {
-        return array
-        (
-        //  'equation'			=> '',
-            'start'             => 1,
-            'max'               => 10,
-            'sort'              => '-',
-            'filter'            => null,
-            'minscore'          => 0,
-        //  'rset'              => null,
-        //  'defaultop'         => 'OR',
-        //  'opanycase'         => true,
-        //  'defaultindex'      => null,
-            'checkatleast'      => 100,
-        //  'facets'            => null,
-        //  'boost'             => null,
-        //  'auto'              => null,
-        //  'defaultequation'   => null,
-        //  'defaultfilter'     => null,
-        //  'autosort'          => '-', // tri auto : ordre pour une requête booléenne, cf setSortOrder.
-        //  'docset'            => null, // un tableau de termes : array('REF'=>array(1,2,3,4...));
-        );
+        return new XapianSearchResult($this, $request);
     }
 
-    public function find(Query $query, array $options = array())
+    /**
+     *
+     * @return XapianDatabase
+     */
+    public function getXapianDatabase()
     {
-        return new XapianSearch($this, $query, $options);
+        return $this->db;
+    }
+
+    /**
+     * @return XapianQueryParser
+     * @throws Exception
+     */
+    public function getQueryParser()
+    {
+        if (isset($this->xapianQueryParser)) return $this->xapianQueryParser;
+
+        // Récupère le schéma de la base
+        $schema = $this->schema;
+
+        // Crée le QueryParser
+        $parser = new XapianQueryParser();
+
+        // Indique au queryParser la base de donnée sutilisée (pour FLAG_WILDCARD)
+        $parser->set_database($this->db);
+
+        // Définit l'index par défaut
+        $default = $schema->defaultindex;
+        if (! is_null($index = $schema->indices->get($default)))
+        {
+            $parser->add_prefix('', $index->_id . ':');
+        }
+        else // schema::validate garantit que defaultindex existe
+        {
+            $alias = $schema->aliases->get($default);
+            foreach($alias->indices as $index)
+            {
+                $parser->add_prefix('', $schema->indices->get($index)->_id . ':');
+            }
+        }
+
+        // Indique au QueryParser la liste des index de base disponibles
+        foreach($schema->indices as $name => $index)
+        {
+            $parser->add_prefix($name, $index->_id . ':');
+        }
+
+        // Indique au QueryParser la liste des alias disponibles
+        foreach($schema->aliases as $name => $alias)
+        {
+            foreach($alias->indices as $index)
+            {
+                $parser->add_prefix($name, $schema->indices->get($index)->_id . ':');
+            }
+        }
+
+        // Initialise le stopper (suppression des mots-vides)
+        $stopper = new XapianSimpleStopper();
+        foreach ($schema->_stopwords as $stopword=>$i)
+        {
+            $stopper->add($stopword);
+        }
+        $parser->set_stopper($stopper);
+
+        $this->xapianQueryParser = $parser;
+        $this->xapianStopper = $stopper; // fixme : il faut garder une référence sur le stopper sinon segfault
+
+        return $parser;
+        /*
+         // Expérimental : autorise un value range sur le champ REF s'il existe une clé de tri nommée REF
+        foreach($this->schema->sortkeys as $name=>$sortkey)
+        {
+        if (!isset($sortkey->type)) $sortkey->type='string'; // FIXME: juste en attendant que les bases asco soient recréées
+        if ($sortkey->type==='string')
+        {
+        // todo: xapian ne supporte pas de préfixe pour les stringValueRangeProcessor
+        // $this->vrp=new XapianStringValueRangeProcessor($this->schema->sortkeys['ref']->_id);
+        }
+        else
+        {
+        $this->vrp=new XapianNumberValueRangeProcessor($sortkey->_id, $name.':', true);
+        $this->xapianQueryParser->add_valuerangeprocessor($this->vrp);
+        }
+        // todo: date
+        }
+        */
+    }
+
+    public function getIndexTerms($doc)
+    {
+        if ($doc instanceof Document)
+        {
+            $doc = $doc->getDocid();
+        }
+
+        try
+        {
+            /**
+             * @var \XapianDocument
+             */
+            $doc = $this->db->get_document($doc);
+        }
+        catch (\Exception $e)
+        {
+            $this->handleException($e);
+        }
+
+        $result = array();
+/*
+
+  index Journal:
+      actualites : type=term, weight=1, pos=array(0),
+      hebdomadaires : type=term, weight=1, pos=array(2)
+      sociales : type=term, weight=1, pos=array(1)
+      _actualites_sociales_hebdomadaires_ : type=term, weight=0, pos=null
+      // lookups
+      Actualités Sociales Hebdomadaires : type=lookup, weight=0, pos=null
+      // sortkeys
+      actualites sociales hebdomadaires : type=attribute, weight=0, pos=null
+
+
+*/
+        /**
+         * @var \XapianTermIterator
+         */
+        $begin = $doc->termlist_begin();
+
+        /**
+         * @var \XapianTermIterator
+         */
+        $end = $doc->termlist_end();
+        while (! $begin->equals($end))
+        {
+            $term = $begin->get_term();
+            $type = 'term';
+            if (false === $pt=strpos($term,':'))
+            {
+                $index = '';
+            }
+            else
+            {
+                $prefix = substr($term, 0, $pt);
+                $term = substr($term, $pt+1);
+                if ($prefix[0] === 'T')
+                {
+                    $type = 'lookup';
+                    $prefix = substr($prefix, 1);
+                }
+                elseif ($term[0] === '_')
+                {
+                    $type = 'keyword';
+                }
+                $index = $this->schema->indices->get($prefix)->name;
+            }
+
+            /**
+             * @var \XapianPositionIterator
+             */
+            $posBegin = $begin->positionlist_begin();
+
+            /**
+             * @var \XapianPositionIterator
+             */
+            $posEnd = $begin->positionlist_end();
+
+            $pos = array();
+            while(! $posBegin->equals($posEnd))
+            {
+                $pos[] = $posBegin->get_termpos();
+                $posBegin->next();
+            }
+
+            if (! isset($result[$index])) $result[$index] = array();
+            $result[$index][$term]=array
+            (
+                'type' => $type,
+                'weight' => $begin->get_wdf(),
+                'total' => $begin->get_termfreq(),
+                'pos' => count($pos) ? $pos : null,
+            );
+
+            $begin->next();
+        }
+
+        /**
+         * @var \XapianValueIterator
+         */
+        $begin = $doc->values_begin();
+
+        /**
+         * @var \XapianValueIterator
+         */
+        $end = $doc->values_end();
+        while (! $begin->equals($end))
+        {
+            $slot = $begin->get_valueno();
+            $term = $begin->get_value();
+            if (ord($term) < 31 || ord($term) > 230) $term = '0x' . strtoupper(dechex(ord($term)));
+
+            $index = $this->schema->indices->get($slot)->name;
+            if (! isset($result[$index])) $result[$index] = array();
+            $result[$index][$term]=array
+            (
+                'type' => 'attribute',
+                'weight' => null,
+                'total' => null,
+                'pos' => null,
+            );
+            $begin->next();
+        }
+
+        // Trie par nom d'index (xapian les retourne triés par ID)
+        ksort($result);
+
+        return $result;
     }
 }
