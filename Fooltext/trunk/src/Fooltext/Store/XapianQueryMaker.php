@@ -27,15 +27,15 @@ use \XapianQuery;
 class XapianQueryMaker
 {
     /**
-     * La collection sur laquelle porte la recherche.
+     * La base sur laquelle porte la recherche.
      *
-     * @var XapianCollection
+     * @var XapianStore
      */
-    protected $collection;
+    protected $store;
 
-    public function __construct(XapianCollection $collection)
+    public function __construct(XapianStore $store)
     {
-        $this->collection = $collection;
+        $this->store = $store;
     }
 
     /**
@@ -155,12 +155,12 @@ class XapianQueryMaker
 
     protected function getPrefixes($field)
     {
-        return array($this->collection->getSchema()->fields->get($field)->_id.':');
+        return array($this->store->getSchema()->indices->get($field)->_id.':');
 
         return array($field.'1:');
         return array($field.'1:', $field.'2:');
         return array('f1:', 'f2:', 'f3:');
-        return array($this->collection->getField($field)->_id . ':', '4:');
+        return array($this->store->getField($field)->_id . ':', '4:');
     }
 
 }
