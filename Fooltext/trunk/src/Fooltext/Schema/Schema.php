@@ -31,6 +31,7 @@ use XMLWriter;
  * @property string $document Nom de la classe utilisée pour représenter les documents de la base.
  * @property string $docid Nom du champ utilisé comme identifiant unique des documents.
  * @property string $notes Notes et remarques internes.
+ * @property string $defaultindex Nom de l'index par défaut.
  *
  * @property-read Fooltext\Schema\Fields $fields Liste des champs du schéma.
  * @property-read Fooltext\Schema\Indices $indices Liste des index du schéma.
@@ -56,6 +57,7 @@ class Schema extends Node
         'document' => '\\Fooltext\\Document\\Document',
         'docid' => '',
         'notes' => '',
+        'defaultindex' => '',
     );
 
     /**
@@ -130,7 +132,8 @@ class Schema extends Node
         }
 
         // Teste la version du schéma et convertit le DOM en tableau de données en conséquence
-        switch($version = self::getXmlVersion($dom))
+        $version = self::getXmlVersion($dom);
+        switch($version)
         {
             case 1: // Version 1, le schéma doit être converti
                 $converter = new SchemaConverter();
@@ -435,6 +438,17 @@ class Schema extends Node
     {
         $result = parent::validate($errors);
         if (empty($this->format)) $this->format = self::$defaults['format'];
+
+        if (empty($this->defaultindex))
+        {
+            $errors[] = "Vous devez indiquer le nom de l'index par défaut (propriété defaultindex du schéma)";
+            return false;
+        }
+        if (! $this->indices->has($this->defaultindex) && ! $this->aliases->has($this->defaultindex))
+        {
+            $errors[] = "L'index par défaut indiqué ($this->defaultindex) n'existe pas (propriété defaultindex du schéma)";
+            return false;
+        }
 
         // Attribue un ID aux champs, aux sous-champs et aux index
 //         $this->setId($this->fields, 'a');
