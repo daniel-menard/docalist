@@ -13,6 +13,8 @@
 namespace Fooltext\Store;
 
 use Fooltext\Schema\Schema;
+use Fooltext\Query\Query;
+use Fooltext\Store\SearchRequest;
 
 /**
  * Interface des bases de données.
@@ -64,24 +66,13 @@ interface StoreInterface
     public function delete($id);
 
     /**
-     * Retourne les options de recherche par défaut.
-     *
-     * La méthode retourne un tableau qui contient les options de
-     * recherche supportées par l'argument $options de la méthode
-     * {@link find()} et leurs valeurs par défaut.
-     *
-     * @return array
-     */
-    public function getSearchOptions();
-
-    /**
      * Recherche des documents.
      *
-     * @param Query $query
-     * @param array $options
+     * @param SearchRequest $request
+     *
      * @return DocumentSetInterface
      */
-    public function find(Query $query, array $options = array());
+    public function find(SearchRequest $request);
 
     // Fonctions d'information
 
