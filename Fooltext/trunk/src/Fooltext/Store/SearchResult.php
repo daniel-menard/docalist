@@ -271,5 +271,20 @@ abstract class SearchResult implements Iterator
      */
     abstract public function getMatchingTerms($internal = false);
 
+    /**
+     * Retourne la liste des termes qui ont été stockés dans la base pour le
+     * document en cours.
+     *
+     * getIndexTerms() permet de "voir" comment un document a été indexé.
+     *
+     * La méthode retourne un tableau qui indique les mots, les mots-clés, les
+     * entrées de table de lookup et les attributs qui ont été générés lors de
+     * l'indexation. Si un terme est indexé à la phrase, la liste des positions
+     * est également retournée.
+     *
+     * @return array()
+     */
+    abstract public function getIndexTerms();
+
     abstract public function getCorrectedQuery();
 }
