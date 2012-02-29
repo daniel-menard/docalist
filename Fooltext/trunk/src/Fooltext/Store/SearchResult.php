@@ -104,14 +104,19 @@ abstract class SearchResult implements Iterator
     abstract public function isEmpty();
 
     /**
-     * Retourne une estimation du nombre de réponses obtenues.
+     * Retourne le nombre de réponses obtenues.
      *
-     * @param int|string $countType le type d'estimation à fournir ou le
-     * libellé à utiliser
-
-     * @return int|string
+     * La méthode peut retourner :
+     * - $type === null : le nombre de réponses obtenues estimé.
+     * - $type === 'min' : le nombre minimum de réponses obtenues.
+     * - $type === 'max' : le nombre maximum de réponses obtenues.
+     * - $type === 'round' : une version arrondie du nombre de réponses obtenues.
+     *
+     * @param null|string $type
+     *
+     * @return int
      */
-    abstract public function count();
+    abstract public function count($type = null);
 
     /* Interface Iterator */
 
