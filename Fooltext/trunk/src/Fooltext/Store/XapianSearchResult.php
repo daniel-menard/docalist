@@ -98,7 +98,7 @@ class XapianSearchResult extends SearchResult
         $this->xapianQueryParser = $store->getQueryParser();
 
         $this->xapianQuery = $this->createXapianQuery($searchRequest);
-//        echo "Xapian Query: <code>", $this->xapianQuery->get_description(), "</code><br />";
+//         echo "Xapian Query: <code>", $this->xapianQuery->get_description(), "</code><br />";
 
         // Initialise l'environnement de recherche
         $this->xapianEnquire = new XapianEnquire($store->getXapianDatabase());
@@ -136,20 +136,36 @@ class XapianSearchResult extends SearchResult
     }
 
     /**
-     * Retourne une estimation du nombre de réponses obtenues lors de la
-     * dernière recherche exécutée.
+     * Retourne le nombre de réponses obtenues.
      *
-     * @param null|string $format Par défaut, (format = null), la méthode retourne un entier
-     * contenant une estimation du nombre de réponses. Vous pouvez formatter le résultat en
-     * passant en paramètre un format tel que "Environ %s réponses". Dans ce cas, la méthode
-     * retournera un entier si elle connait le nombre exact de réponses et une chaine formattée
-     * sinon.
+     * La méthode peut retourner :
+     * - $type === null : le nombre de réponses obtenues estimé par xapian.
+     * - $type === 'min' : le nombre minimum de réponses obtenues.
+     * - $type === 'max' : le nombre maximum de réponses obtenues.
+     * - $type === 'round' : une version arrondie du nombre de réponses obtenues.
      *
-     * @return int|string
+     * @param null|string $type
+     *
+     * @return int
      */
-    public function count($format = null)
+    public function count($type = null)
     {
-        if (is_null($format) || $this->count === 0) return $this->count;
+        if (is_null($type) || $this->count === 0) return $this->count;
+
+        if ($type === 'min')
+        {
+            return $this->xapianMSet->get_matches_lower_bound();
+        }
+
+        if ($type === 'max')
+        {
+            return $this->xapianMSet->get_matches_upper_bound();
+        }
+
+        if ($type !== 'round')
+        {
+            throw new \BadMethodCallException('count : type incorrect, min, max, round ou null attendu');
+        }
 
         $min = $this->xapianMSet->get_matches_lower_bound();
         $max = $this->xapianMSet->get_matches_upper_bound();
@@ -157,9 +173,11 @@ class XapianSearchResult extends SearchResult
         // Si min==max, c'est qu'on a le nombre exact de réponses, pas d'évaluation
         if ($min === $max) return $min;
 
-        $unit = pow(10, floor(log10($max-$min))-1);
+        $unit = pow(10, floor(log10($max - $min)));
         $round = max(1, round($this->count / $unit)) * $unit;
 
+// echo "min=$min, max=$max, count=$this->count, unit=$unit, round=$round<br />";
+// echo "max-min=", $max-$min, ", log10(max-min)=", log10($max - $min), ", floor(log10(max-min))=", floor(log10($max - $min)), ", 10 puissance ça=", $unit, "<br />";
 
         // Dans certains cas, on peut se retrouver avec une évaluation inférieure à start, ce
         // qui génère un pager de la forme "Réponses 2461 à 2470 sur environ 2000".
@@ -168,17 +186,10 @@ class XapianSearchResult extends SearchResult
         // dans la base documentaire bdsp.
         if ($round < $this->searchRequest->start())
         {
-            $round = max(1, round($count / $unit)+1) * $unit;
+            $round = max(1, round($count / $unit) + 1) * $unit;
         }
 
-        $round = number_format($round, 0, '.', ' ');
-
-        if ($unit === 0.1)
-        {
-            return '~&#160;' . $round; //  ou '±&#160;'
-        }
-
-        return sprintf($format, $round);
+        return (int) $round;
     }
 
     /* <Iterator> */
