@@ -560,6 +560,88 @@ class XapianSearchResult extends SearchResult
         return array_keys($terms);
     }
 
+    public function getIndexTerms()
+    {
+        $doc = $this->xapianMSetIterator->get_document();
+        $result = array();
+
+        // Construit la liste des termes (mots, mots-clés, lookups)
+        $begin = $doc->termlist_begin();
+        $end = $doc->termlist_end();
+        while (! $begin->equals($end))
+        {
+            $term = $begin->get_term();
+            $type = 'term';
+            if (false === $pt=strpos($term,':'))
+            {
+                $index = '';
+            }
+            else
+            {
+                $prefix = substr($term, 0, $pt);
+                $term = substr($term, $pt+1);
+                if ($prefix[0] === 'T')
+                {
+                    $type = 'lookup';
+                    $prefix = substr($prefix, 1);
+                }
+                elseif ($term[0] === '_')
+                {
+                    $type = 'keyword';
+                }
+                $index = $this->schema->indices->get($prefix)->name;
+            }
+
+            // Liste des positions pour le terme en cours
+            $posBegin = $begin->positionlist_begin();
+            $posEnd = $begin->positionlist_end();
+
+            $pos = array();
+            while(! $posBegin->equals($posEnd))
+            {
+                $pos[] = $posBegin->get_termpos();
+                $posBegin->next();
+            }
+
+            if (! isset($result[$index])) $result[$index] = array();
+            $result[$index][$term]=array
+            (
+                    'type' => $type,
+                    'weight' => $begin->get_wdf(),
+                    'total' => $begin->get_termfreq(),
+                    'pos' => count($pos) ? $pos : null,
+            );
+
+            $begin->next();
+        }
+
+        // Liste des attributs (values)
+        $begin = $doc->values_begin();
+        $end = $doc->values_end();
+        while (! $begin->equals($end))
+        {
+            $slot = $begin->get_valueno();
+            $term = $begin->get_value();
+            if (ord($term) < 31 || ord($term) > 230) $term = '0x' . strtoupper(dechex(ord($term)));
+
+            $index = $this->schema->indices->get($slot)->name;
+            if (! isset($result[$index])) $result[$index] = array();
+            $result[$index][$term]=array
+            (
+                    'type' => 'attribute',
+                    'weight' => null,
+                    'total' => null,
+                    'pos' => null,
+            );
+            $begin->next();
+        }
+
+        // Trie par nom d'index (xapian les retourne triés par ID)
+        ksort($result);
+
+        return $result;
+    }
+
     public function getCorrectedQuery()
     {
 
