@@ -107,7 +107,7 @@ class XapianSearchResult extends SearchResult
         $this->xapianEnquire->set_query($this->xapianQuery);
 
         // Lance la recherche
-        $this->xapianMSet = $this->xapianEnquire->get_MSet($searchRequest->start(), $searchRequest->max(), $searchRequest->checkatleast());
+        $this->xapianMSet = $this->xapianEnquire->get_MSet($searchRequest->start()-1, $searchRequest->max(), $searchRequest->checkatleast());
 
         // Détermine le nombre de réponses obtenues
         $this->count = $this->xapianMSet->get_matches_estimated();
@@ -201,7 +201,7 @@ class XapianSearchResult extends SearchResult
 
     public function key()
     {
-        return $this->xapianMSetIterator->get_rank();
+        return $this->xapianMSetIterator->get_rank() + 1;
     }
 
     public function current()
