@@ -14,6 +14,7 @@ namespace Fooltext\Store;
 
 use \Iterator;
 use Fooltext\Document\Document;
+use Fooltext\Schema\Schema;
 use Fooltext\Schema\Fields;
 
 /**
@@ -62,6 +63,13 @@ abstract class SearchResult implements Iterator
     protected $document;
 
     /**
+     * Le schéma de la base en cours.
+     *
+     * @var Schema
+     */
+    protected $schema;
+
+    /**
      * Les champs du schéma.
      *
      * @var Fields;
@@ -73,7 +81,8 @@ abstract class SearchResult implements Iterator
     {
         $this->store = $store;
         $this->searchRequest = $searchRequest;
-        $this->fields = $this->store->getSchema()->fields;
+        $this->schema = $this->store->getSchema();
+        $this->fields = $this->schema->fields;
     }
 
     /**
