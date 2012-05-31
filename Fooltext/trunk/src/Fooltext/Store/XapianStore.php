@@ -12,15 +12,15 @@
  */
 namespace Fooltext\Store;
 
-use Fooltext\Indexing\AnalyzerData;
+use Fab\Indexing\AnalyzerData;
 
 use Fooltext\Document\Document;
-use Fooltext\Schema\Schema;
-use Fooltext\Schema\FieldNames;
-use Fooltext\Schema\Field;
-use Fooltext\Schema\Group;
-use Fooltext\Schema\Index;
-use Fooltext\Schema\Exception\NotFound;
+use Fab\Schema\Schema;
+use Fab\Schema\FieldNames;
+use Fab\Schema\Field;
+use Fab\Schema\Group;
+use Fab\Schema\Index;
+use Fab\Schema\Exception\NotFound;
 
 use Fooltext\Store\SearchRequest;
 use \XapianQueryParser;
@@ -48,7 +48,7 @@ class XapianStore implements StoreInterface
     /**
      * Le schéma de la base en cours.
      *
-     * @var Fooltext\Schema\Schema
+     * @var Fab\Schema\Schema
      */
     protected $schema;
 
@@ -236,7 +236,7 @@ class XapianStore implements StoreInterface
      * est passé en paramètre.
      *
      * @param string $class
-     * @return Fooltext\Indexing\AnalyzerInterface
+     * @return Fab\Indexing\AnalyzerInterface
      */
     protected function getAnalyzer($class)
     {
