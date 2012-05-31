@@ -12,7 +12,7 @@
  */
 namespace Fooltext\Document;
 
-use Fooltext\Schema\Schema;
+use Fab\Schema\Schema;
 
 class Document extends FieldList
 {
