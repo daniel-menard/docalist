@@ -12,7 +12,7 @@
  */
 namespace Fooltext\QueryParser;
 
-use Fooltext\Indexing\Lowercase;
+use Fab\Indexing\Lowercase;
 class Lexer
 {
     const
