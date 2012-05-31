@@ -1,11 +1,11 @@
 <?php
 namespace Fooltext\Document;
 
-use Fooltext\Schema\Field;
+use Fab\Schema\Field;
 
-use Fooltext\Schema\BaseNode;
-use Fooltext\Schema\Group;
-use Fooltext\Schema\Exception\NotFound;
+use Fab\Schema\BaseNode;
+use Fab\Schema\Group;
+use Fab\Schema\Exception\NotFound;
 use \IteratorAggregate, \ArrayIterator, \ArrayAccess, \Countable, \Serializable;
 use \InvalidArgumentException;
 
@@ -112,7 +112,7 @@ class FieldList implements IteratorAggregate, ArrayAccess, Countable, Serializab
             }
             else
             {
-                if (is_array($value) && count($value) === 1) $value = reset($value);
+                //if (is_array($value) && count($value) === 1) $value = reset($value);
             }
             $data[$field->get($key)] = $value;
         }
