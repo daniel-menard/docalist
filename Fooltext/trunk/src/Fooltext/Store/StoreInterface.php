@@ -12,7 +12,7 @@
  */
 namespace Fooltext\Store;
 
-use Fooltext\Schema\Schema;
+use Fab\Schema\Schema;
 use Fooltext\Query\Query;
 use Fooltext\Store\SearchRequest;
 
@@ -87,14 +87,14 @@ interface StoreInterface
     /**
      * Retourne le schéma de la base.
      *
-     * @return \Fooltext\Schema\Schema
+     * @return \Fab\Schema\Schema
      */
     public function getSchema();
 
     /**
      * Modifie le schéma de la base.
      *
-     * @param \Fooltext\Schema\Schema $schema
+     * @param \Fab\Schema\Schema $schema
      */
     public function setSchema(Schema $schema);
 }
