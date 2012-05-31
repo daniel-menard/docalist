@@ -38,7 +38,9 @@ namespace Fooltext\Document;
  *   l'objet Document doit retourner la valeur null. Il ne doit pas générer d'exception,
  *   ni d'erreurs, ni de warnings.
  */
-interface DocumentInterface extends \IteratorAggregate, \ArrayAccess, \Countable
+use Fab\Schema\Fields;
+
+interface DocumentInterface extends \IteratorAggregate, \ArrayAccess, \Serializable
 {
     /**
      * Construit un nouveau document contenant les données
@@ -46,7 +48,7 @@ interface DocumentInterface extends \IteratorAggregate, \ArrayAccess, \Countable
      *
      * @param array $data
      */
-    public function __construct(array $data = array());
+    public function __construct(Fields $fields, array $data = array());
 
     /**
      * Retourne le contenu du champ dont le nom est indiqué.
