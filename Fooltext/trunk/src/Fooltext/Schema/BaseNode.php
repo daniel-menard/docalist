@@ -237,4 +237,19 @@ abstract class BaseNode implements IteratorAggregate
     {
         return true;
     }
+
+    public function dump()
+    {
+        $data = $this->getData();
+        foreach($data as $name=>& $item)
+        {
+            if (substr($name, 0, 1) === '_')
+                unset($data[$name]);
+            elseif ($item instanceof BaseNode)
+                $item = self::dumpNode($item);
+            elseif (is_string($item) && strlen($item)>50)
+                $item=substr($item, 0, 50) . '...';
+        }
+        return $data;
+    }
 }
