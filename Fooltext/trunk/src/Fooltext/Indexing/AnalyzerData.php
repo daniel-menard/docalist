@@ -12,7 +12,7 @@
  */
 namespace Fooltext\Indexing;
 
-use Fooltext\Schema\Index;
+use Fab\Schema\Index;
 
 /**
  * Structure contenant le champ à analyser et dans laquelle les analyseurs
@@ -23,9 +23,9 @@ class AnalyzerData
 {
     /**
      * La définition de l'index en cours de cration, tel qu'il figure
-     * dans le {@link \Fooltext\Schema\Schema schéma} de la base de données.
+     * dans le {@link \Fab\Schema\Schema schéma} de la base de données.
      *
-     * @var \Fooltext\Schema\Index
+     * @var \Fab\Schema\Index
      */
     public $index;
 
