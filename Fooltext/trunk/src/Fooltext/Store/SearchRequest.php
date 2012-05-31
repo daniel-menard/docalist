@@ -15,7 +15,7 @@ namespace Fooltext\Store;
 use \Request;
 use \Exception;
 use \Config;
-use Fooltext\Schema\Schema;
+use Fab\Schema\Schema;
 
 class SearchRequest
 {
@@ -31,10 +31,10 @@ class SearchRequest
 //    protected $opanycase = 'true';
 //    protected $defaultindex = null;
 
-    protected $prob = null; // conserver l'ordre : seules les propriétés au dessus peuvent figurer dans la query string
-    protected $bool = null;
-    protected $love = null;
-    protected $hate = null;
+    protected $prob = array(); // conserver l'ordre : seules les propriétés au dessus peuvent figurer dans la query string
+    protected $bool = array();
+    protected $love = array();
+    protected $hate = array();
 
     public function __construct($data = null, Schema $schema = null)
     {
