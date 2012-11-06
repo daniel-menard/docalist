@@ -17,7 +17,7 @@
 /*
  * Notre wordpress est installé de façon spécifique :
  * - wordpress est dans un sous-répertoire (/wordpress)
- * - wp-content n'existe pas, c''est la racine du site qui remplit cet usage
+ * - wp-content n'existe pas, c'est la racine du site qui remplit cet usage
  * - tout le code tiers (wordpress, plugins, themes) sont installés sous forme d'external subversion.
  */
 // cf. http://codex.wordpress.org/Editing_wp-config.php#Advanced_Options
