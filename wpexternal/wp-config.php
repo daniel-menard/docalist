@@ -14,6 +14,18 @@
  * @package WordPress
  */
 
+/*
+ * Notre wordpress est installé de façon spécifique :
+ * - wordpress est dans un sous-répertoire (/wordpress)
+ * - wp-content n'existe pas, c''est la racine du site qui remplit cet usage
+ * - tout le code tiers (wordpress, plugins, themes) sont installés sous forme d'external subversion.
+ */
+// cf. http://codex.wordpress.org/Editing_wp-config.php#Advanced_Options
+define('WP_HOME',    'http://' . $_SERVER['HTTP_HOST'] . '/wpexternal');
+define('WP_SITEURL', WP_HOME . '/wordpress');
+define('WP_CONTENT_DIR', __DIR__);
+define('WP_CONTENT_URL', WP_HOME);
+
 // ** MySQL settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
 define('DB_NAME', 'wpexternal');
@@ -83,13 +95,8 @@ define('WP_DEBUG', false);
 /* That's all, stop editing! Happy blogging. */
 
 /** Absolute path to the WordPress directory. */
-define('ABSPATH', __DIR__ . '/wordpress/');
-
-// cf. http://codex.wordpress.org/Editing_wp-config.php#Advanced_Options
-define('WP_HOME',    'http://' . $_SERVER['HTTP_HOST'] . '/wpexternal');
-define('WP_SITEURL', WP_HOME . '/wordpress');
-define('WP_CONTENT_DIR', __DIR__);
-define('WP_CONTENT_URL', WP_HOME);
+if ( !defined('ABSPATH') )
+    define('ABSPATH', __DIR__ . '/wordpress/');
 
 /** Sets up WordPress vars and included files. */
 require_once(ABSPATH . 'wp-settings.php');
