@@ -90,7 +90,6 @@ define('WP_HOME',    'http://' . $_SERVER['HTTP_HOST'] . '/wpexternal');
 define('WP_SITEURL', WP_HOME . '/wordpress');
 define('WP_CONTENT_DIR', __DIR__);
 define('WP_CONTENT_URL', WP_HOME);
-define('WP_LANG_DIR', __DIR__ . '/content/languages/');
 
 /** Sets up WordPress vars and included files. */
 require_once(ABSPATH . 'wp-settings.php');
