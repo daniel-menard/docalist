@@ -8,11 +8,13 @@
  * Plugin Name: Docalist Resources
  * Plugin URI:  http://docalist.org
  * Plugin Type: Piklist
- * Description: Docalist : gestion d'un annuaire de ressources.
+ * Description: Docalist: resources directory management.
  * Version:     0.1
  * Author:      Docalist
  * Author URI:  http://docalist.org
- * 
+ * Text Domain: docalist-resources
+ * Domain Path: /languages
+ *  
  * @package     Docalist
  * @subpackage  Resources
  * @author      Daniel Ménard <daniel.menard@laposte.net>
