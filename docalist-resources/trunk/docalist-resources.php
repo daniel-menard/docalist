@@ -22,8 +22,8 @@
  */
 
 namespace Docalist\Resources;
-use Docalist\PluginManager; 
+use Docalist;
 
-if (class_exists('Docalist\\PluginManager')) {
-    PluginManager::load('Docalist\Resources\Plugin', __DIR__);
+if (class_exists('Docalist')) {
+    Docalist::load('Docalist\Resources\Plugin', __DIR__);
 }
