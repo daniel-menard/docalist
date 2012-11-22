@@ -10,8 +10,8 @@
  * Plugin Type: Piklist
  * Description: Docalist: resources directory management.
  * Version:     0.1
- * Author:      Docalist
- * Author URI:  http://docalist.org
+ * Author:      Daniel Ménard
+ * Author URI:  http://docalist.org/
  * Text Domain: docalist-resources
  * Domain Path: /languages
  *  
@@ -25,5 +25,9 @@ namespace Docalist\Resources;
 use Docalist;
 
 if (class_exists('Docalist')) {
-    Docalist::load('Docalist\Resources\Plugin', __DIR__);
+    // Enregistre notre espace de noms
+    Docalist::registerNamespace(__NAMESPACE__, __DIR__ . '/class');
+    
+    // Charge le plugin
+    Docalist::load('Docalist\\Resources\\Plugin', __FILE__);
 }

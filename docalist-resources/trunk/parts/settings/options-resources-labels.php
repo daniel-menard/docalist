@@ -18,7 +18,7 @@
 namespace Docalist\Resources;
 use Docalist;
 
-$plugin = Docalist::plugin('Resources');
+$plugin = Docalist::plugin('docalist-resources');
 
 _e('<p>Utilisez les options ci-dessous pour modifier les libellés utilisés pour désigner la base et son contenu.</p>', 'docalist-resources');
 
