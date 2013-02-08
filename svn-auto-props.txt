@@ -25,9 +25,14 @@ enable-auto-props = yes
 
 # Adapté de : 
 # http://www.anthor.net/blog/divers/configurer-les-autoprops-de-tortoise-svn-rev-lastchangeddate-author-id/
+#
+# Pour markdown, le type mime provient de : 
+# http://svn.alfresco.com/repos/alfresco-open-mirror/alfresco/HEAD/root/projects/data-model/config/alfresco/mimetype/mimetype-map.xml
 
 # Code source (ini, txt, yaml : cf plus bas "fichiers textes divers")
+*.as         = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
 *.c          = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+*.cgi        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn-mine-type=text/plain
 *.css        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/css
 *.cpp        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
 *.dtd        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/xml
@@ -35,16 +40,16 @@ enable-auto-props = yes
 *.htm        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/html
 *.html       = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/html
 *.java       = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
-*.as         = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
-*.cgi        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn-mine-type=text/plain
 *.js         = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/javascript
+*.markdown   = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/x-markdown
+*.md         = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/x-markdown
 *.php        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/x-php
 *.pl         = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/x-perl; svn:executable
 *.pm         = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/x-perl
-*.sql        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/x-sql
-*.t          = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/x-perl; svn:executable
 *.py         = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/x-python; svn:executable
 *.sh         = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/x-sh; svn:executable
+*.sql        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/x-sql
+*.t          = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/x-perl; svn:executable
 *.xhtml      = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/xhtml+xml
 *.xml        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/xml
 *.xsd        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/xml
