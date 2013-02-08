@@ -1,0 +1,101 @@
+# Ce fichier contient (un bout de) ce qui peut figurer dans le fichier de 
+# configuration de subversion
+# Il permet d'activer les "auto-props" et de rajouter automatiquement aux 
+# fichiers qui sont ajoutés à svn les bonnes caractéristiques (type mime, fin
+# de ligne, keywords, etc.)
+#
+# Recopiez le contenu de ce fichier et ajoutez le à la fin du fichier de config
+# de subversion :
+# - Sous windows : %APPDATA%\Subversion\config
+# - Sous *nix : ~/.subversion/config
+#
+# DM, 08/02/13
+
+[miscellany]
+enable-auto-props = yes
+
+[auto-props]
+### The format of the entries is:
+###   file-name-pattern = propname[=value][;propname[=value]...]
+### The file-name-pattern can contain wildcards (such as '*' and
+### '?').  All entries which match (case-insensitively) will be
+### applied to the file.  Note that auto-props functionality
+### must be enabled, which is typically done by setting the
+### 'enable-auto-props' option.
+
+# Adapté de : 
+# http://www.anthor.net/blog/divers/configurer-les-autoprops-de-tortoise-svn-rev-lastchangeddate-author-id/
+
+# Code source (ini, txt, yaml : cf plus bas "fichiers textes divers")
+*.c          = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+*.css        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/css
+*.cpp        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+*.dtd        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/xml
+*.h          = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+*.htm        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/html
+*.html       = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/html
+*.java       = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+*.as         = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+*.cgi        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn-mine-type=text/plain
+*.js         = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/javascript
+*.php        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/x-php
+*.pl         = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/x-perl; svn:executable
+*.pm         = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/x-perl
+*.sql        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/x-sql
+*.t          = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/x-perl; svn:executable
+*.py         = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/x-python; svn:executable
+*.sh         = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/x-sh; svn:executable
+*.xhtml      = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/xhtml+xml
+*.xml        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/xml
+*.xsd        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/xml
+*.xsl        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/xml
+*.xslt       = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/xml
+*.xul        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/xul
+ 
+# Images
+*.bmp        = svn:mime-type=image/bmp
+*.gif        = svn:mime-type=image/gif
+*.ico        = svn:mime-type=image/ico
+*.jpeg       = svn:mime-type=image/jpeg
+*.jpg        = svn:mime-type=image/jpeg
+*.png        = svn:mime-type=image/png
+*.tif        = svn:mime-type=image/tiff
+*.tiff       = svn:mime-type=image/tiff
+ 
+# Fichiers binaires
+*.pdf        = svn:mime-type=application/pdf
+*.avi        = svn:mime-type=video/avi
+*.doc        = svn:mime-type=application/msword
+*.eps        = svn:mime-type=application/postscript
+*.gz         = svn:mime-type=application/gzip
+*.mov        = svn:mime-type=video/quicktime
+*.mp3        = svn:mime-type=audio/mpeg
+*.ppt        = svn:mime-type=application/vnd.ms-powerpoint
+*.ps         = svn:mime-type=application/postscript
+*.psd        = svn:mime-type=application/photoshop
+*.rtf        = svn:mime-type=text/rtf
+*.swf        = svn:mime-type=application/x-shockwave-flash
+*.tgz        = svn:mime-type=application/gzip
+*.wav        = svn:mime-type=audio/wav
+*.xls        = svn:mime-type=application/vnd.ms-excel
+*.zip        = svn:mime-type=application/zip
+ 
+# Fichiers textes divers
+.htaccess    = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+*.txt        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+*.ini        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+*.yml        = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+ 
+AUTHORS      = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+BUGS         = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+CHANGES      = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+COPYING      = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+DEPENDENCIES = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+DEPRECATED   = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+INSTALL*     = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+LICENSE      = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+Makefile*    = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+MANIFEST*    = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+PLATFORMS    = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+README       = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
+TODO         = svn:eol-style=native; svn:keywords="Author Date Id Rev URL"; svn:mime-type=text/plain
