@@ -4,7 +4,7 @@
  *
  * For copyright and license information, please view the
  * LICENSE.txt file that was distributed with this source code.
- * 
+ *
  * Plugin Name: Docalist Resources
  * Plugin URI:  http://docalist.org
  * Plugin Type: Piklist
@@ -14,7 +14,7 @@
  * Author URI:  http://docalist.org/
  * Text Domain: docalist-resources
  * Domain Path: /languages
- *  
+ *
  * @package     Docalist
  * @subpackage  Resources
  * @author      Daniel Ménard <daniel.menard@laposte.net>
@@ -22,12 +22,12 @@
  */
 
 namespace Docalist\Resources;
-use Docalist;
+use Docalist, Docalist\Autoloader;
 
 if (class_exists('Docalist')) {
     // Enregistre notre espace de noms
-    Docalist::registerNamespace(__NAMESPACE__, __DIR__ . '/class');
-    
+    Autoloader::register(__NAMESPACE__, __DIR__ . '/class');
+
     // Charge le plugin
-    Docalist::load('Docalist\\Resources\\Plugin', __FILE__);
+    Docalist::load('Docalist\Resources\Resources', __FILE__);
 }
