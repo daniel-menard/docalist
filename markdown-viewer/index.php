@@ -22,7 +22,7 @@
  *   serveur web ne le retourne pas automatiquement).
  *
  * Les premières lignes du script contiennent quelques options de config
- * que vous pouvez modifier à votre conveance.
+ * que vous pouvez modifier à votre convenance.
  *
  * Normallement, il n'y a pas lieu de toucher à ce qui suit "stop editing".
  *
