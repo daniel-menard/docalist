@@ -2,12 +2,13 @@
 /**
  * This file is part of a "Docalist Resources" plugin.
  *
+ * Copyright (C) 2012,2013 Daniel Ménard
+ *
  * For copyright and license information, please view the
  * LICENSE.txt file that was distributed with this source code.
  *
  * Plugin Name: Docalist Resources
  * Plugin URI:  http://docalist.org
- * Plugin Type: Piklist
  * Description: Docalist: resources directory management.
  * Version:     0.1
  * Author:      Daniel Ménard
@@ -29,5 +30,5 @@ if (class_exists('Docalist')) {
     Autoloader::register(__NAMESPACE__, __DIR__ . '/class');
 
     // Charge le plugin
-    Docalist::load('Docalist\Resources\Resources', __FILE__);
+    Docalist::load('Docalist\Resources\Plugin', __FILE__);
 }
